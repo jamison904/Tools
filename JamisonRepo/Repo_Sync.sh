@@ -25,6 +25,7 @@ do
   echo "#              10 - Sync AOKP Jellybean                  #"
   echo "#              11 - Sync Baked AOSP                      #"
   echo "#              12 - Slim 4.2                             #"
+  echo "#              13 - AOKP MR2                             #"
   echo "##########################################################"
   echo "#                      x - Exit                          #"
   echo "##########################################################"
@@ -47,6 +48,7 @@ do
      10) sh tools/AOKP-JB.sh; echo "Done";;
      11) sh tools/AOSPBaked.sh; echo "Done";;
      12) sh tools/Slim.sh; echo "Done";;
+     13) sh tools/AOKP-MR2.sh; echo "Done";;
       x) clear; echo; echo "Goodbye."; echo; exit 1;;
       *) echo "Invalid option"; continue;;
     esac

@@ -2,7 +2,7 @@
 
 echo "##############################################"
 echo "#                                            #"
-echo "#           Building LiquidSmooth            #"
+echo "#          Building AOKP JB 4.3              #"
 echo "#                                            #"
 echo "#                                            #"
 echo "##############################################"
@@ -14,11 +14,11 @@ ADDITIONAL="$2"
 THREADS=`cat /proc/cpuinfo | grep processor | wc -l`
 
 echo "Making directory"
-mkdir Liquid
-cd Liquid
+mkdir AOKP
+cd AOKP
 
 echo "Initializing Repo"
-repo init -u git://github.com/LiquidSmooth/android.git -b jb
+repo init -u git://github.com/AOKP/platform_manifest.git -b jb-mr2
 
 echo "Repo Syncing"
 repo sync
