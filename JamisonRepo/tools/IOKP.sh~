@@ -21,7 +21,7 @@ echo "Initializing Repo"
 repo init -u https://github.com/IOKP/platform_manifest.git -b jb-mr2
 
 echo "Repo Syncing"
-repo sync -j16
+repo sync
 
 END=$(date +%s)
 ELAPSED=$((END - START))

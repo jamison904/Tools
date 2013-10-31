@@ -68,7 +68,7 @@ ADDITIONAL="$2"
 THREADS=`cat /proc/cpuinfo | grep processor | wc -l`
 
 echo "Building jfltetmo"
-make clean && . build/envsetup.sh && brunch flo -j8
+make clean && . build/envsetup.sh && brunch jfltetmo -j8
 
 END=$(date +%s)
 ELAPSED=$((END - START))
