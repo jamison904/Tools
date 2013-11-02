@@ -1,0 +1,7 @@
+
+# Todo
+
+* Check the binary packages downloaded from Oracle are the correct size.
+* Add support to build for a given Ubuntu distribution.
+* Add support to build using `pbuilder` or use `fakeroot`.
+
