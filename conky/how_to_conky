@@ -1,0 +1,16 @@
+add all files to "home" folder then
+
+sudo apt-get install conky conky-all
+
+cd && wget -O .start-conky http://goo.gl/qvhpJ
+
+chmod +x .start-conky
+
+
+
+Now open Startup Applications > click Add  > New Dialog box will open click on Browse > Go to your Home directory then click on start-conky.sh
+
+
+
+
+
