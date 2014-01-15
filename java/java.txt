@@ -1,3 +1,16 @@
+The best method currently:
+
+sudo add-apt-repository ppa:webupd8team/java
+
+sudo apt-get update
+
+sudo apt-get install oracle-java6-installer
+
+sudo update-java-alternatives -s java-6-oracle
+
+sudo apt-get install oracle-java6-set-default
+
+#old method
 Open termial and type these commands. ~Jamison904
 
 first remove what you currently have by:
