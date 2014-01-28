@@ -1,0 +1,24 @@
+This script will build a chroot ubuntu right on the device.
+It will create the proper image and download the necessary packages for the image.
+(Approximately 200megs.)
+
+
+Currently only ubuntu supported. 
+
+extract the zip to /data/local
+open a terminal or adb shell
+su root
+
+sh install-or-mount 
+follow the instructions for the command line switches...
+
+eg:
+Code:
+sh install-or-mount -i -n linux.img -m /data/local/chroot -l /data/local -o precise -0
+This includes a busybox built for kitkat.
+This was fully tested on a nexus 7 2013 stock 4.4.3 + ElementalX Kernel 2.6
+
+
+This script is in the alpha stages.
+I am not responsible for you, your device, families devices if you use this script.
+you use at your own risk.

@@ -1,0 +1,668 @@
+#!./bin/sh 
+###############################################
+# debootstrap image creator from device  v1   #
+# Created by userdelroot r00t316@gmail.com    #
+# This script is for non-commercial use only  #
+# feel free to modify and use this script     #
+# as long as this header stays in tacted      #
+# enjoy!                                      #
+###############################################
+
+APP=$0
+
+sanity_check () {
+	local m
+	# for now just check root, other checks to come later or if needed.
+	# A more thorough chech needs to be done.
+	#
+	
+	echo -n "checking root:					"
+
+	# check if we are root
+	perm=$(id | cut -b 5)
+	if [ "$perm" != "0" ]; then
+		echo "root is required"
+		echo "Please su or root your device"
+		echo "exiting..."
+		FAILURE=1
+		handle_cleanup 
+	fi
+	echo "[OK]"
+
+	# First we want to make sure these mount points are not in use.
+	# As this will cause problems enter the chroot or installing
+	m=$(cat /proc/mounts | grep $MOUNT)
+	if [ ! -z "$m" ]; then
+		echo "$MOUNT is already mounted		[fail]"
+		echo "reboot device to umount"
+		FAILURE=1
+		handle_cleanup 
+	fi
+}
+
+handle_error() {
+
+	local error cmd retval args bb
+	error="$("$@" 2>&1 >&3)"
+	retval="$?"
+	cmd="$1"
+	args="$2"
+	bb="$3"
+
+	if [ $retval -ne 0 ]; then
+		# make sure there is error msg if not make one
+		if [ -z "$error" ]; then
+			echo "[fail]"
+			echo "Failure bailing out"
+			FAILURE=1
+			handle_cleanup
+		fi
+
+		echo "[fail]"
+
+		echo
+		# need to do some checks (isbb) as busybox cmd will throw this off a little cause of args. 
+		if [ ! -z "$bb" ]; then
+			echo ">>CMD: [${cmd} ${args}] ARGS: [${bb} $4 $5 $6]"
+			echo ">>>ERROR: [${error}]"
+		else
+			echo ">>CMD: [${cmd}] ARGS: [${args} $4 $5 $6]"
+			echo ">>>ERROR: [${error}]"
+
+		fi
+
+		FAILURE=1
+		handle_cleanup
+	fi
+}
+
+setup_env () {
+
+	# global 
+	export SELFPATH=$(pwd)
+	
+	# redirect stderr to stdout
+	exec 3>&1
+
+
+	case "$1" in
+
+	init)
+	
+		if [ -e "$SELFPATH/.bin-configs-done" ]; then
+			return
+		fi	
+
+		echo "Build enviroment initializing..."
+		# this will setup all applets for the system 
+		local sysbin sysxbin selfbin test1 applet binconfigs
+		sysxbin="/system/xbin"
+		sysbin="/system/bin"
+		selfbin="$SELFPATH/bin"
+		binconfigs="$SELFPATH/bin-configs"
+		cd $binconfigs
+				
+		for applet in *; do
+			
+			echo "check $applet xbin path"
+			
+			if [ ! -e "$sysxbin/$applet" ]; then
+				echo "$applet path non existent"
+				echo "make sure symlink isn't just missing" 
+				test1=$(command -v grep)
+				if [ ! -z $("$sysxbin/busybox" --list | $test1 "^$applet$") ]; then
+					
+					echo "$applet exists, but not symlinked"
+					# sysmlink to our bin directory
+					ln -s "$sysxbin/busybox" "$selfbin/$applet"	
+					echo "$sysxbin/busybox $selfbin/$applet" >> "$SELFPATH/.bin-configs-done"	
+				else
+					echo "applet $applet using built in busybox"
+					ln -s "$selfbin/busybox" "$selfbin/$applet"	
+					echo "$selfbin/busybox $selfbin/$applet" >> "$SELFPATH/.bin-configs-done"	
+				
+				fi
+			else
+				if [ -e "$sysxbin/$applet" ]; then
+					ln -s "$sysxbin/busybox" "$selfbin/$applet"	
+					echo "$sysxbin/busybox $selfbin/$applet" >> "$SELFPATH/.bin-configs-done"	
+					continue
+				fi
+				if [ -e "$sysbin/$applet" ]; then
+					ln -s "$sysbin/$applet" "$selfbin/$applet"	
+					echo "$sysbin/$applet $selfbin/$applet" >> "$SELFPATH/.bin-configs-done"	
+				fi
+
+			fi
+
+		done 
+	   
+		cd $SELFPATH	
+		;;
+	install)
+		echo -n "setting up enviroment:				"
+		export PATH="$SELFPATH/bin"
+		export USER=root
+		export UID=0
+		export mnt="$MOUNT"
+		export LOC="$IMGLOC"
+		export IMG="$IMGNAME"
+		export debootstrap="$SELFPATH/bin/debootstrap"
+		echo "[OK]"
+		;;
+	outchroot)
+		echo -n "Setting up enviroment:				"
+		export LOC="$IMGLOC"
+		export PATH=/usr/bin:/usr/sbin:/bin:$PATH
+		export TERM=linux
+		export HOME=/root
+		export USER=root
+		export UID=0
+		export mnt="$MOUNT"
+		export IMG="$IMGNAME"
+		echo "[OK]"
+		;;
+	inchroot)
+		echo -n "Setting up nameservers:				"
+		handle_error sysctl -wq net.ipv4.ip_forward=1 # needed to get connection inside chroot
+		echo "nameserver 8.8.8.8" > $mnt/etc/resolv.conf
+		echo "nameserver 8.8.4.4" >> $mnt/etc/resolv.conf
+		echo "127.0.0.1 localhost" > $mnt/etc/hosts
+		echo "[OK]"
+		;;
+	*)
+		;;
+
+	esac
+}
+
+unmount_chroot () {
+	# not used yet.
+	:
+}
+
+mount_chroot () {
+
+	# check mount location
+	echo -n "checking mount point:				"
+	if [ ! -d $mnt ]; then
+		handle_error mkdir $mnt
+	fi
+	echo "[OK]"
+
+
+	echo
+	echo "Mount location: ${mnt}"
+	for param in $*; do
+		case "$param" in 
+		rootfs)
+			echo -n "rootfs:						"
+			handle_error mount -o loop ${LOC}/${IMG} $mnt
+			echo "[OK]"
+			;;
+		dev)
+			echo -n "/dev:						"
+			handle_error mount -o bind /dev/ $mnt/dev
+			echo "[OK]"
+			;;
+		sys)
+			echo -n "/sys:						"
+			if [ ! -d $mnt/sys ];then
+				handle_error mkdir $mnt/sys
+			fi
+			handle_error mount -t sysfs sysfs $mnt/sys
+			echo "[OK]"
+			;;
+		proc)
+			echo -n "/proc:						"
+			handle_error mount -t proc proc $mnt/proc
+			echo "[OK]"
+			;;
+		pts)
+			echo -n "/dev/pts:					"
+			if [ ! -d  $mnt/dev/pts ]; then
+				handle_error mkdir $mnt/dev/pts
+			fi
+			handle_error mount -t devpts devpts $mnt/dev/pts
+			echo "[OK]"
+			;;
+		shm)
+			echo -n "/dev/shm:					"
+			if [ ! -d $mnt/dev/shm ]; then
+				handle_error mkdir $mnt/dev/shm
+			fi
+			handle_error mount -t tmpfs none $mnt/dev/shm 
+			echo "[OK]"
+			;;
+		internal_sd)
+			# now mount internal and external storage so we can access them via our chroot
+			if [ -d "$EMULATED_STORAGE_SOURCE/0" ]; then
+				echo -n "mount internal_sd:				"
+
+				if [ ! -d $mnt/media/internal_sd ]; then
+					handle_error mkdir $mnt/media/internal_sd
+				fi
+
+				handle_error mount -o bind $EMULATED_STORAGE_SOURCE/0 $mnt/media/internal_sd
+
+				echo "[OK]"
+			fi
+			;;	
+		external_sd)
+
+			if [ -d /external_sd ]; then
+				echo -n "mount external_sd:				"
+
+				if [ ! -d $mnt/media/external_sd ]; then
+					handle_error mkdir $mnt/media/external_sd
+				fi
+
+				handle_error mount -o bind /external_sd $mnt/media/external_sd
+				echo "[OK]"
+			fi
+			;;
+
+		*)
+			;;
+		esac
+	done
+
+	if [ "$MOUNTONLY" == "true" ]; then
+		# create mtab to fix compaints from binarys tune2fs etc
+		echo -n "creating mtab entries:				"
+		cat /proc/mounts | grep $mnt | sed "s|$mnt/*|/|g" > $mnt/etc/mtab
+		echo "[OK]"
+	fi
+}
+
+
+enter_chroot () {
+	echo -n "Entering chroot enviroment:			"
+	case "$1" in
+	rootshell)
+		echo "[rootshell]"
+		echo
+		echo
+		echo "To exit chroot just type: exit :in the console below"
+		echo "Enjoy!!"
+		chroot $mnt /bin/bash
+		;;
+	setup)
+		echo "[setup]"
+		handle_error cp $SELFPATH/setup.sh $mnt/setup.sh
+		handle_error chmod 755 $mnt/setup.sh
+
+		chroot $mnt /setup.sh 
+		;;
+	init)
+		echo "[init]"
+		chroot $mnt /root/init.sh
+		;;
+	*)
+		;;
+	esac
+
+}
+
+handle_cleanup() {
+	# cleanup and shutdown script
+	exec 1>&3 3>&-  
+	sysctl -wq net.ipv4.ip_forward=0
+
+	# need to make sure we cleanly umount
+	# entire chroot or shit breaks when
+	# trying to reenter it.
+	# will need to add additional checks.
+	if [ $FAILURE -eq 1 ]; then
+		# umount system
+		umount $mnt/dev/shm > /dev/null 2>&1
+		umount $mnt/dev/pts > /dev/null 2>&1
+		umount $mnt/dev > /dev/null 2>&1
+		umount $mnt/sys > /dev/null 2>&1
+		umount $mnt/proc > /dev/null 2>&1
+		umount $mnt/media/internal_sd > /dev/null 2>&1
+		umount $mnt/media/external_sd > /dev/null 2>&1
+		sleep 1 
+		umount $mnt > /dev/null 2>&1
+		exit 1
+	fi
+
+	echo "exiting chroot"
+	# umount system
+	umount $mnt/dev/shm > /dev/null 2>&1
+	umount $mnt/dev/pts > /dev/null 2>&1
+	umount $mnt/dev > /dev/null 2>&1
+	umount $mnt/sys > /dev/null 2>&1
+	umount $mnt/proc > /dev/null 2>&1
+	umount $mnt/media/internal_sd > /dev/null 2>&1
+	umount $mnt/media/external_sd > /dev/null 2>&1
+	sleep 1
+	umount $mnt
+
+
+	echo "done" 
+	exit
+}
+
+
+create_img () {
+
+	local fs_type
+	if [ -e "$IMGLOC/$IMGNAME" ]
+	then
+		echo "image:$IMGLOC/$IMGNAME exits, exiting"
+		FAILURE=1
+		handle_cleanup
+	fi
+
+	echo -n "Creating image:					"
+	handle_error dd if=/dev/zero of="$IMGLOC/$IMGNAME" bs=512k count="$IMGSIZE"
+	echo "[OK]"
+
+	# ext2 is much faster then ext4 
+	# plus without the overhead, default is ext2 
+	# unless device does not support it.
+	fs_type=$(cat /proc/filesystems | grep 'ext2' | sed 's/^ *//g')
+	if [ ! -z "$fs_type" ]; then
+		
+		echo "Formating $fs_type"
+		handle_error mkfs.ext2 -F $IMGLOC/$IMGNAME 
+	else
+		echo "Formating using system default"
+		handle_error mke2fs -F $IMGLOC/$IMGNAME 
+	fi
+
+	echo "[OK]"
+}
+
+
+do_debootstrap () {
+
+	case "$1" in
+
+	firststage)
+		if [ ! -d $mnt ]
+		then
+			handle_error mkdir $mnt
+		fi
+
+		gen_mirrors
+
+		echo "starting debootstrap"
+		echo " debootstrap --no-check-gpg --extractor=ar --arch=armhf --foreign $DIST $mnt $MIRROR"
+		handle_error  debootstrap --no-check-gpg --extractor=ar --arch=armhf --foreign $DIST $mnt $MIRROR
+		echo "[finished]"
+		handle_cleanup
+	exit
+		;;
+	secondstage)
+		echo "debootstrap second stage"
+		handle_error chroot $mnt /debootstrap/debootstrap --second-stage
+		echo "[finished]"
+		;;
+	thirdstage)
+		echo "finishing setup"
+		gen_sources $DIST
+		enter_chroot setup
+		echo "[finished]"	
+
+		;;
+	*)
+		;;
+	esac
+}
+
+
+gen_mirrors () {
+	local ubuntu deb kali 
+	ubuntu="http://ports.ubuntu.com"
+	deb="http://ftp.us.debian.org/debian"
+	kali="http://http.kali.org/kali"
+	case "$1" in 
+	lucid) export MIRROR=$ubuntu 
+		;;
+	precise) export MIRROR=$ubuntu 
+		;;
+	quantal) export MIRROR=$ubuntu 
+		;;
+	raring) export MIRROR=$ubuntu 
+		;;
+	saucy) export MIRROR=$ubuntu 
+		;;
+	squeeze) export MIRROR=$deb 
+		;;
+	wheezy) export MIRROR=$deb 
+		;;
+	jessie) export MIRROR=$deb 
+		;;
+	lenny) export MIRROR=$deb 
+		;;
+	kali) export MIRROR=$kali 
+		;;
+	?)
+		echo "invalid Distro $DIST, using default precise"
+		export MIRROR=$ubuntu
+		;;
+	esac
+
+}
+
+gen_sources () {
+	local spath="$SELFPATH/apt-sources"
+	echo "Generating apt sources.list					"
+	case "$1" in 
+	lucid) 
+		cat $spath/ubuntu.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	precise) 
+		cat $spath/ubuntu.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	quantal)
+		cat $spath/ubuntu.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	raring)
+		cat $spath/ubuntu.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	saucy) 
+		cat $spath/ubuntu.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	squeeze) 
+		cat $spath/debian.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	wheezy)
+		cat $spath/debian.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	jessie)
+		cat $spath/debian.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	lenny)
+		cat $spath/debian.sources | sed "s/DISTRO_CHANGE/$DIST/g" > $mnt/etc/apt/sources.list
+		;;
+	kali) 
+		cat $spath/kali.sources > $mnt/etc/apt/sources.list
+		;;
+	*) ;;
+	esac
+
+	echo "[OK]"
+}
+
+process_request (){
+
+
+	case "$1" in
+	install)
+		echo "Install options:"
+		echo "Distro: $DIST"
+		echo "image: $IMGNAME  size: $IMGSIZE img location: $IMGLOC" 
+		echo
+		setup_env init
+		setup_env install
+		sanity_check
+		create_img
+		mount_chroot rootfs
+		do_debootstrap firststage
+		setup_env outchroot
+		mount_chroot sys proc pts shm	
+		do_debootstrap secondstage
+		setup_env inchroot
+		do_debootstrap thirdstage
+		enter_chroot init
+		;;
+	mountonly)
+		echo "Preparing chroot enviroment"
+		echo "Image name: $IMGNAME"
+		echo "Mount Location: $MOUNT"
+		echo "Image Location: $IMGLOC"
+		echo
+		setup_env outchroot
+		sanity_check
+		mount_chroot rootfs sys proc dev pts shm internal_sd external_sd
+		setup_env inchroot
+		enter_chroot init
+		;;
+	*)
+		;;
+	esac
+}
+
+usage()
+{
+
+cat <<EOF
+usage: ${APP} options
+	Building debootstrap images on the device and mounting chroot images.
+
+	-h Show this help
+
+	Select, what you want to do.
+	-i Install  
+	or
+	-z Mount Only
+
+	[Install and Mount Only]
+	  [Required Options]
+	-n Image name
+		eg: ubuntu-12.04.img
+	-m Mount path
+		/data/local/linux is default
+	-l Image location
+
+		[Install]
+	[Required Options]
+	-o Distro - default: Precise
+	Supported: Ubuntu 
+
+	[Optional Image Sizes] 
+       [DEFAULT: 800M]
+	-0  800M - Min
+	-1  1G
+	-2  1.5G
+	-3  2G
+	-4  2.5G
+	-5  3G
+	-6  3.5G - Max
+
+example mount: ${APP} -z -n linux.img -m /data/local/temp -l /data/local
+example install: ${APP} -i -n linux.img -m /data/local/temp -l /data/local -o precise -0
+EOF
+
+}
+
+while getopts 'izh012345678n:m:l:o:' OPTION
+
+do
+	case $OPTION in
+	h)
+		usage
+		exit 1
+		;;
+	i)
+		INSTALL="true"
+		;;
+	z)
+		MOUNTONLY="true"
+		;;
+	n)
+		IMGNAME="$OPTARG"
+		;;
+	m)
+		MOUNT="$OPTARG"
+		;;
+	l)
+		IMGLOC="$OPTARG"
+		;;
+	o)
+		DIST="$OPTARG"
+		;;
+	0)
+		IMGSIZE=1600  # 800megs
+		;;
+	1)
+		IMGSIZE=2048 # 1 gig
+		;;
+
+	2)
+		IMGSIZE=3072 # 1.5 gig
+		;;
+	3)
+		IMGSIZE=4096 # 2 gig
+		;;
+
+	4)
+		IMGSIZE=5120 # 2.5 gig
+		;;
+
+	5)
+		IMGSIZE=6144 # 3 gig
+		;;
+	6)
+		IMGSIZE=7196 # 3.5 max
+		;;
+	?)
+		usage
+		exit
+		;;
+	esac
+
+done
+
+if [ -z "$IMGNAME" ] || [ -z "$MOUNT" ] || [ -z "$IMGLOC" ]; then
+	usage
+	exit 1
+fi
+
+# make sure install and mount only are not both set
+
+if [ ! -z "$MOUNTONLY" ] && [ ! -z "$INSTALL" ]; then
+
+	usage
+	exit 1
+fi
+
+
+if [ -z "$MOUNTONLY" ]; then
+
+	if [ -z "$DIST" ] 
+	then
+		usage
+		exit 1
+	fi
+
+	if [ -z "$IMGSIZE" ]
+	then
+		IMGSIZE=1600
+	fi
+
+	process_request install
+fi
+
+if [ -z "$INSTALL" ]; then
+
+	process_request mountonly
+fi
+
+# clean exit from chroot no errros.
+FAILURE=0
+handle_cleanup
+exit

@@ -1,0 +1,5 @@
+deb http://ports.ubuntu.com/ DISTRO_CHANGE main universe multiverse restricted
+
+deb http://ports.ubuntu.com/ DISTRO_CHANGE-updates main universe multiverse restricted
+
+deb http://ports.ubuntu.com/ DISTRO_CHANGE-security main universe multiverse restricted
