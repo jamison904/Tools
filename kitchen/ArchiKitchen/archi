@@ -1,0 +1,816 @@
+﻿#!/bin/bash
+ 
+# Copyright 2014 JustArchi@JustArchi.net
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Initial variables
+VERSION="1.0"
+TOOLS=(basename dirname clear gcc java perl sed wget od wc cpio zip unzip tar)
+ACTIVE_PROJECT=""
+MODEMINCLUDED=false
+ARCH="arm"
+ALIGN=4
+
+clear
+echo -n "Please wait"
+
+# Navigate to our folder, even if user didn't execute it from the root dir
+cd $(dirname $0)
+
+# Before we begin, make sure that all our tools are available
+for TOOL in "${TOOLS[@]}"; do
+	echo -n "."
+	if [ -z $(which $TOOL) ]; then
+		echo "It looks like you don't have one of the required tools: $TOOL"
+		echo "This check was made through 'which' command"
+		echo "Please install missing tool and launch kitchen again"
+		exit 1
+	fi
+done
+
+# Make sure our tools are executable
+chmod -R 755 tools
+
+# Core
+PRESS_ENTER() {
+	read -p "Press [Enter] key to continue..."
+}
+
+ROOT_EXECUTE() {
+	if [ $(whoami) == "root" ]; then
+		$@
+	else
+		echo "Root access is required! I'm about to execute command $@"
+		sudo $@
+	fi
+}
+
+DO_SETPROJECT() {
+	echo
+	echo "You currently don't have any active projects"
+	echo "I'll now list you all available projects, which you created in the past"
+	echo
+	COUNT=0
+	for i in $(find . -maxdepth 1 -iname "PROJECT_*" -type d); do
+		COUNT=$(expr $COUNT + 1)
+		echo "["$COUNT"] - $(basename $i)"
+	done
+	if [ $COUNT -gt 0 ]; then
+		echo "I found $COUNT available projects, and listed them above. Please tell me which one you want to use"
+		echo "Write a number of the project, which you want to activate or..."
+	else
+		echo "Sorry, I didn't find any available project, it looks like you must create a new one"
+	fi
+	echo
+	echo "Write n to create a new project"
+	echo "Write x to abort"
+	echo -n "CHOICE: "
+	read CHOICE
+	case "$CHOICE" in
+		"n")
+			DO_NEWPROJECT
+			;;
+		"x")
+			exit 0
+			;;
+		*)
+			if [ $CHOICE -gt $COUNT ] || [ $CHOICE -lt 1 ]; then
+				echo "Error, invalid selection"
+				return 1
+			fi
+			COUNT=$CHOICE
+			for i in $(find . -maxdepth 1 -iname "PROJECT_*" -type d); do
+				COUNT=$(expr $COUNT - 1)
+				if [ $COUNT -eq 0 ]; then
+					ACTIVE_PROJECT=$(basename $i)
+					break
+				fi
+			done
+			if [ -z $ACTIVE_PROJECT ]; then
+				echo "Error, you didn't select anything"
+				return 1
+			else
+				echo "OK, current active project is now $ACTIVE_PROJECT"
+			fi
+	esac
+	return 0
+}
+
+DO_NEWPROJECT() {
+	clear
+	echo "You can create a new bare bones project or a project based on a base drop"
+	echo "In most situations you want to extract the base, but bare bones project may be useful f.e. for deodexing a set of apps only"
+	echo
+	echo "b - Create bare bones project"
+	echo "e - Extract a ROM and use as base"
+	read -p "Which one you want to create? [b/e]: " CHOICE
+	case "$CHOICE" in
+		"e")
+			;;
+		*)
+			ACTIVE_PROJECT="PROJECT_"
+			ACTIVE_PROJECT+="$(date '+%m%d%y_%H%M%S')"
+			echo "Creating bare $ACTIVE_PROJECT"
+			mkdir -p $ACTIVE_PROJECT/system
+			return 0
+	esac
+	echo "ArchiKitchen currently supports system in system.img and system.img.ext4 format"
+	echo "Please put proper base drop in base_drops folder"
+	echo "It can be standalone system.img(.ext4) file, or an archive, which contains such file"
+	echo "Are you ready?"
+	PRESS_ENTER
+	SEARCH=true
+	while ($SEARCH); do
+		echo "Looking for system.img..."
+		SYSTEMDIR=""
+		SYSTEMFILE=""
+		for f in $(find base_drops -type f); do
+			FILE=$(basename $f)
+			case "$FILE" in
+				"system.img")
+					SYSTEMDIR=$(dirname $f)
+					SYSTEMFILE=$(basename $f)
+					echo "Found $SYSTEMDIR/$SYSTEMFILE, which should be the proper file"
+					SEARCH=false
+					break
+					;;
+				"system.img.ext4")
+					SYSTEMDIR=$(dirname $f)
+					SYSTEMFILE=$(basename $f)
+					echo "Found $SYSTEMDIR/$SYSTEMFILE, which should be the proper file"
+					SEARCH=false
+					break
+					;;
+				*)
+			esac
+		done
+		if [ -z "$SYSTEMFILE" ]; then
+			echo "No system.img found"
+			echo
+			echo "r - refresh"
+			echo "d - decompress one of the files, if it should contain system.img"
+			echo "x - abort"
+			echo -n "CHOICE: "
+			read CHOICE
+			case "$CHOICE" in
+				"r")
+					clear
+					;;
+				"d")
+					COUNT=0
+					for i in $(find base_drops/ -type f); do
+						COUNT=$(expr $COUNT + 1)
+						echo "["$COUNT"] - $(dirname $i)/$(basename $i)"
+					done
+					echo "Please tell me which file should contain system.img"
+					echo -n "CHOICE: "
+					read CHOICE
+					if [ $CHOICE -gt $COUNT ] || [ $CHOICE -lt 1 ]; then
+						echo "Error, invalid selection"
+						exit 1
+					fi
+					COUNT=$CHOICE
+					for i in $(find base_drops/ -type f); do
+						COUNT=$(expr $COUNT - 1)
+						if [ $COUNT -eq 0 ]; then
+							FILE="$i"
+							break
+						fi
+					done
+					echo "Extracting everything from $FILE"
+
+					# TODO: We should find more universal way for finding out type of the file
+					tar xvf $FILE -C base_drops/ || unzip $FILE -d base_drops/
+
+					if [ $? -ne 0 ]; then
+						echo "Error, it looks like this file format isn't supported"
+						return 1
+					fi
+					;;
+				"x")
+					return 1
+					;;
+				*)
+					echo "No valid selection"
+					return 1
+			esac
+		fi
+	done
+
+	ACTIVE_PROJECT="PROJECT_"
+	ACTIVE_PROJECT+="$(date '+%m%d%y_%H%M%S')"
+	echo "Creating $ACTIVE_PROJECT"
+	mkdir -p $ACTIVE_PROJECT/system
+	cp $SYSTEMDIR/boot.img $ACTIVE_PROJECT/boot.img
+
+	# TODO: Support non-ext4 filesystems
+	FS="ext4"
+
+	cp $SYSTEMDIR/$SYSTEMFILE $ACTIVE_PROJECT/system.img
+	for EXTRA in 'cache.img' 'modem.bin'; do
+		if [ -e $SYSTEMDIR/$EXTRA ]; then
+			echo "Found extra $EXTRA file"
+			echo "Do you want to include this file in your ROM?"
+			case "$EXTRA" in
+				"cache.img")
+					echo "This file usually contains CSC stuff. Say yes if you're unsure"
+					;;
+				"modem.bin")
+					echo "This file usually contains low-level binary code responsible for mobile connection. Say no if you're unsure"
+					;;
+				*)
+			esac
+			echo
+			read -p "Include? [y/n]: " CHOICE
+			case "$CHOICE" in
+				"y")
+					cp $SYSTEMDIR/$EXTRA $ACTIVE_PROJECT/$EXTRA
+					;;
+				*)
+			esac
+		fi
+	done
+	for PARTITION in 'system.img' 'cache.img'; do
+		if [ -e $ACTIVE_PROJECT/$PARTITION ]; then
+			mv -f $ACTIVE_PROJECT/$PARTITION $ACTIVE_PROJECT/$PARTITION.$FS
+		fi
+	done
+
+	DO_MAKESURE_WEHAVE_SIMG2IMG
+	DO_SIMG2IMG_ALL
+	DO_MAKESURE_WEHAVE_METAINF
+	CHECK_KERNEL
+	CHECK_MODEM
+	BUILD_UPDATER_SCRIPT
+}
+
+DO_SIMG2IMG_ALL() {
+	for f in $(find $ACTIVE_PROJECT -maxdepth 1 -type f -iname "*.ext4"); do
+		echo "Converting and mounting $(basename $f)"
+		./temp/simg2img $f $f.simg2img
+		rm -f $f
+		mkdir -p /tmp/ArchiKitchenLOOP
+		ROOT_EXECUTE "mount -o loop $f.simg2img /tmp/ArchiKitchenLOOP"
+		echo "Extracting files from $(basename $f)"
+		IMGNAME=$(basename "$f" | cut -d'.' -f1)
+		case "$IMGNAME" in
+			"cache")
+				unzip -q /tmp/ArchiKitchenLOOP/recovery/sec_csc.zip -d $ACTIVE_PROJECT/
+				# Delete old META-INF
+				rm -rf $ACTIVE_PROJECT/META-INF
+				;;
+			*)
+				cp -R /tmp/ArchiKitchenLOOP/* $ACTIVE_PROJECT/$IMGNAME/
+		esac
+		ROOT_EXECUTE "umount /tmp/ArchiKitchenLOOP"
+		rm -f $f.simg2img
+	done
+}
+
+CHECK_KERNEL() {
+	if [ ! -e $ACTIVE_PROJECT/META-INF/com/google/android/updater-script ] || ([ $(grep -i "boot.img" $ACTIVE_PROJECT/META-INF/com/google/android/updater-script | wc -l) -eq 0 ] && [ $(grep -i "zImage" $ACTIVE_PROJECT/META-INF/com/google/android/updater-script | wc -l) -eq 0 ]); then
+		echo "WARNING! No kernel path found in current updater-script"
+		echo "This is typical when you're converting image-based rom to zip-based rom"
+		local MODEL=$(grep -i "ro.product.model" $ACTIVE_PROJECT/system/build.prop | cut -d'=' -f2)
+		echo "Detected ROM model: $MODEL"
+		echo "Make sure it's proper model for your device!"
+		PRESS_ENTER
+		if [ -e files/product/$MODEL/KERNEL ]; then
+			KERNELPATH=$(cat files/product/$MODEL/KERNEL)
+		else
+			echo "This model does not yet exist in our database"
+			echo "Please write your kernel path manualy. Example of kernel path from GT-I9300: /dev/block/mmcblk0p5"
+			echo -n "Kernel path for your model: "
+			read KERNELPATH
+		fi
+		echo "Based on model above and our little database, your kernel path should be $KERNELPATH"
+		echo "MAKE SURE IT'S CORRECT, OVERWRITING WRONG PATHS MAY LEAD TO SOFT AND HARD BRICKS"
+		PRESS_ENTER
+		echo "\"$KERNELPATH\");" >> $ACTIVE_PROJECT/META-INF/com/google/android/updater-script-KERNEL
+		echo "OK, This is the final effect:"
+		cat $ACTIVE_PROJECT/META-INF/com/google/android/updater-script-KERNEL
+		echo "Make sure that path and syntax is correct, if not, modify it manualy through file $ACTIVE_PROJECT/META-INF/com/google/android/updater-script-KERNEL BEFORE you proceed to the next step"
+		PRESS_ENTER
+	fi
+}
+
+CHECK_MODEM() {
+	if [ -e $ACTIVE_PROJECT/modem.bin ]; then
+		echo "Modem.bin file found"
+		local MODEL=$(grep -i "ro.product.model" $ACTIVE_PROJECT/system/build.prop | cut -d'=' -f2)
+		echo "Detected ROM model: $MODEL"
+		echo "Make sure it's proper model for your device!"
+		PRESS_ENTER
+		if [ -e files/product/$MODEL/MODEM ]; then
+			MODEMPATH=$(cat files/product/$MODEL/MODEM)
+		else
+			echo "This model does not yet exist in our database"
+			echo "Please write your modem path manualy. Example of modem path from GT-I9300: /dev/block/mmcblk0p7"
+			echo -n "Modem path for your model: "
+			read MODEMPATH
+		fi
+		echo "Based on model above and our little database, your modem path should be $MODEMPATH"
+		echo "MAKE SURE IT'S CORRECT, OVERWRITING WRONG PATHS MAY LEAD TO SOFT AND HARD BRICKS"
+		PRESS_ENTER
+		echo "\"$MODEMPATH\");" >> $ACTIVE_PROJECT/META-INF/com/google/android/updater-script-MODEM
+		echo "OK, This is the final effect:"
+		cat $ACTIVE_PROJECT/META-INF/com/google/android/updater-script-MODEM
+		echo "Make sure that path and syntax is correct, if not, modify it manualy through file $ACTIVE_PROJECT/META-INF/com/google/android/updater-script-MODEM BEFORE you proceed to the next step"
+		PRESS_ENTER
+		MODEMINCLUDED=true
+	fi
+}
+
+DO_MAKESURE_WEHAVE_SIMG2IMG() {
+	if [ ! -e temp/simg2img ]; then
+		mkdir -p temp
+		gcc -O2 tools/simg2img/sparse_crc32.c tools/simg2img/simg2img.c -o temp/simg2img
+	fi
+}
+
+DO_MAKESURE_WEHAVE_METAINF() {
+	mkdir -p $ACTIVE_PROJECT/META-INF/com/google/android
+	cp files/product/generic/update-binary $ACTIVE_PROJECT/META-INF/com/google/android/update-binary
+	for i in "updater-script-HEAD" "updater-script-SYMLINKS" "updater-script-PERMISSIONS" "updater-script-TAIL" "updater-script-KERNEL" "updater-script-MODEM"; do
+		cp "files/product/generic/$i" "$ACTIVE_PROJECT/META-INF/com/google/android/$i"
+	done
+}
+
+REBUILD_UPDATER-SCRIPT() {
+	local MODE=""
+	local STYLE=""
+	local FILE=""
+	for arg in $@; do
+		case "$arg" in
+			"ADD")
+				MODE="ADD"
+				shift 1
+				;;
+			"DEL")
+				MODE="DEL"
+				shift 1
+				;;
+			"HEAD")
+				FILE="updater-script-HEAD"
+				shift 1
+				;;
+			"SYMLINK")
+				FILE="updater-script-SYMLINKS"
+				shift 1
+				;;
+			"PERMISSIONS")
+				FILE="updater-script-PERMISSIONS"
+				shift 1
+				;;
+			"TAIL")
+				FILE="updater-script-TAIL"
+				shift 1
+				;;
+			"KERNEL")
+				FILE="updater-script-KERNEL"
+				shift 1
+				;;
+			"MODEM")
+				FILE="updater-script-MODEM"
+				shift 1
+				;;
+			"APPEND")
+				STYLE="APPEND"
+				shift 1
+				;;
+			"PREPEND")
+				STYLE="PREPEND"
+				shift 1
+				;;
+			*)
+		esac
+	done
+	if [ $MODE == "DEL" ]; then
+		#TODO1: We're handling it through so-called "primary key" but this needs to be implemented in a better way, as it's dangerous
+		sed -i "/$@/d" $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+		shift 1
+	elif [ $MODE == "ADD" ]; then
+		if [ $STYLE == "APPEND" ]; then
+			echo "" >> $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+			cat "$@" >> $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+			echo "" >> $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+		elif [ $STYLE == "PREPEND" ]; then
+			mv $ACTIVE_PROJECT/META-INF/com/google/android/$FILE $ACTIVE_PROJECT/META-INF/com/google/android/$FILE.tmp
+			cat "$@" > $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+			echo "" >> $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+			cat $ACTIVE_PROJECT/META-INF/com/google/android/$FILE.tmp >> $ACTIVE_PROJECT/META-INF/com/google/android/$FILE
+			rm -f $ACTIVE_PROJECT/META-INF/com/google/android/$FILE.tmp
+		fi
+	fi
+	sed -i '/^$/d' $ACTIVE_PROJECT/META-INF/com/google/android/$FILE # This removes empty lines added above
+	#BUILD_UPDATER_SCRIPT # We handle that through scripts itself, as it causes up to 4x non-needed overhead
+}
+
+BUILD_UPDATER_SCRIPT() {
+	echo -n "" > $ACTIVE_PROJECT/META-INF/com/google/android/updater-script
+	for i in "updater-script-HEAD" "updater-script-SYMLINKS" "updater-script-PERMISSIONS" "updater-script-TAIL" "updater-script-KERNEL"; do
+		cat "$ACTIVE_PROJECT/META-INF/com/google/android/$i" >> "$ACTIVE_PROJECT/META-INF/com/google/android/updater-script"
+		echo "" >> "$ACTIVE_PROJECT/META-INF/com/google/android/updater-script"
+	done
+	if ($MODEMINCLUDED); then
+		cat "$ACTIVE_PROJECT/META-INF/com/google/android/updater-script-MODEM" >> "$ACTIVE_PROJECT/META-INF/com/google/android/updater-script"
+		echo "" >> "$ACTIVE_PROJECT/META-INF/com/google/android/updater-script"
+	fi
+}
+
+CLEAN_EVERYTHING() {
+	for i in "updater-script-HEAD" "updater-script-SYMLINKS" "updater-script-PERMISSIONS" "updater-script-TAIL" "updater-script-KERNEL" "updater-script-MODEM"; do
+		rm -f $ACTIVE_PROJECT/META-INF/com/google/android/$i
+	done
+}
+
+CHANGE_ARCHITECTURE() {
+	case "$ARCH" in
+		"arm")
+			ARCH="x86"
+			;;
+		"x86")
+			ARCH="arm"
+			;;
+		*)
+			ARCH="arm"
+	esac
+}
+
+KERNEL_EXTRACT() {
+	mkdir -p temp
+	if [ ! -e temp/mkbootimg ]; then
+		cd tools/kernel/mkbootimg
+		make
+		if [ ! -e mkbootimg ] || [ ! -e unpackbootimg ]; then
+			echo "ERROR! Something went wrong with compilation of mkbootimg!"
+			PRESS_ENTER
+			return 1
+		fi
+		cp mkbootimg ../../../temp/mkbootimg
+		cp unpackbootimg ../../../temp/unpackbootimg
+		make clean
+		cd ../../..
+	fi
+	if [ -e $ACTIVE_PROJECT/boot.img ] && [ ! -e $ACTIVE_PROJECT/kernel ]; then
+		rm -rf $ACTIVE_PROJECT/kernel
+		mkdir -p $ACTIVE_PROJECT/kernel
+		temp/unpackbootimg -i $ACTIVE_PROJECT/boot.img -o $ACTIVE_PROJECT/kernel
+		mkdir -p $ACTIVE_PROJECT/kernel/ramdisk
+		if [ -e $ACTIVE_PROJECT/kernel/boot.img-ramdisk.gz ]; then
+			cd $ACTIVE_PROJECT/kernel/ramdisk
+			#TODO: Handle non-gz ramdisk as well, but not now...
+			gunzip -c ../boot.img-ramdisk.gz | cpio -i
+			cd ../../..
+		fi
+	else
+		echo "No kernel found or kernel is already extracted!"
+		PRESS_ENTER
+		return 1
+	fi
+}
+
+KERNEL_REPACK() {
+	if [ -e $ACTIVE_PROJECT/kernel ]; then
+		if [ -e $ACTIVE_PROJECT/kernel/ramdisk ]; then
+			cd $ACTIVE_PROJECT/kernel/ramdisk
+			find . | cpio -o -H newc | gzip > ../boot.img-ramdisk-NEW.gz
+			cd ../../..
+			temp/mkbootimg --kernel $ACTIVE_PROJECT/kernel/boot.img-zImage --ramdisk $ACTIVE_PROJECT/kernel/boot.img-ramdisk-NEW.* -o $ACTIVE_PROJECT/temp.img
+		else
+			temp/mkbootimg --kernel $ACTIVE_PROJECT/kernel/boot.img-zImage --ramdisk $ACTIVE_PROJECT/kernel/boot.img-ramdisk.* -o $ACTIVE_PROJECT/temp.img
+		fi
+		mv -f $ACTIVE_PROJECT/temp.img $ACTIVE_PROJECT/boot.img
+		rm -rf $ACTIVE_PROJECT/kernel
+	else
+		echo "No extracted kernel found!"
+		PRESS_ENTER
+	fi
+}
+
+KERNEL_ABORT() {
+	rm -rf $ACTIVE_PROJECT/kernel
+	rm -f $ACTIVE_PROJECT/temp.img
+}
+
+ARCHIDROID_INITD() {
+	if [ ! -e $ACTIVE_PROJECT/system/bin/debuggerd.real ]; then
+		mv -f $ACTIVE_PROJECT/system/bin/debuggerd $ACTIVE_PROJECT/system/bin/debuggerd.real
+		cp -R files/archidroid/initd/system/* $ACTIVE_PROJECT/system/
+	else
+		mv -f $ACTIVE_PROJECT/system/bin/debuggerd.real $ACTIVE_PROJECT/system/bin/debuggerd
+	fi
+}
+
+INITD() {
+	KERNEL_EXTRACT
+	if [ -e kernel/ramdisk/init.rc ]; then
+		sed -i -e '0,/class_start /s//start sysinit\n\n    class_start /' kernel/ramdisk/init.rc
+		sed -i -e 's/service media /service sysinit \/system\/bin\/logwrapper \/system\/xbin\/busybox run-parts \/system\/etc\/init.d\n    disabled\n    oneshot\n\nservice media /' kernel/ramdisk/init.rc
+		KERNEL_REPACK
+		cp -R files/initd/system/* $ACTIVE_PROJECT/system/
+		REBUILD_UPDATER-SCRIPT "ADD" "PERMISSIONS" "APPEND" "files/initd/updater-script-PERMISSIONS"
+	else
+		echo "ERROR, no init.rc found?!"
+		rm -rf kernel
+		return 1
+	fi
+	PRESS_ENTER
+}
+
+BUILD() {
+	BUILD_UPDATER_SCRIPT
+	echo "Sometimes kitchen may produce an incorrect updater-script file, that's why you're asked to review updater-script and eventually fix it if needed BEFORE building ROM"
+	echo "Updater-script is based on so-called 'segments' available in the same directory - META-INF/com/google/android"
+	echo "Are you ready?"
+	PRESS_ENTER
+	echo "-=-= UPDATER-SCRIPT START =-=-"
+	cat $ACTIVE_PROJECT/META-INF/com/google/android/updater-script
+	echo "-=-= UPDATER-SCRIPT EOF =-=-"
+	read -p "Are you REALLY sure that above updater-script is correct? ESPECIALLY block-based paths? [y/n]: " CHOICE
+	case "$CHOICE" in
+		"y")
+			;;
+		*)
+			echo "OK, correct your updater-script and/or it's segments and come back when you're finished"
+			PRESS_ENTER
+			return 0
+	esac
+	local COMPLEVEL=""
+	echo
+	echo "Which compression level do you want to use?"
+	echo "0 - Store (fastest, no compression at all)"
+	echo "g - Guess (moderate speed and compression, chosen by zip utility based on content)"
+	echo "9 - Best (slowest, maximum compression)"
+	read -p "CHOICE: " CHOICE
+	case "$CHOICE" in
+		"0")
+			COMPLEVEL="-0"
+			;;
+		"9")
+			COMPLEVEL="-9"
+			;;
+		*)
+	esac
+	cd $ACTIVE_PROJECT
+	zip -ry $COMPLEVEL $ACTIVE_PROJECT.zip . -x META-INF/com/google/android/updater-script-HEAD META-INF/com/google/android/updater-script-SYMLINKS META-INF/com/google/android/updater-script-PERMISSIONS META-INF/com/google/android/updater-script-TAIL META-INF/com/google/android/updater-script-KERNEL
+	cd ..
+	mkdir -p OUTPUT_ZIP
+	mv -f $ACTIVE_PROJECT/$ACTIVE_PROJECT.zip OUTPUT_ZIP/$ACTIVE_PROJECT.zip
+	echo "Done, your ROM is available in OUTPUT_ZIP/$ACTIVE_PROJECT.zip"
+	read -p "Rename it? [y/n]: " CHOICE
+	case "$CHOICE" in
+		"y")
+			read -p "New name: " NAME
+			mv -f OUTPUT_ZIP/$ACTIVE_PROJECT.zip OUTPUT_ZIP/$NAME
+			;;
+		*)
+	esac
+	echo "All done, your ROM should be ready!"
+	echo "Thank you for using ArchiKitchen!"
+	PRESS_ENTER
+	exit 0
+}
+
+DEODEX() {
+	local API=$(grep "ro.build.version.sdk" $ACTIVE_PROJECT/system/build.prop | cut -d'=' -f2)
+	echo "Detected API level $API"
+	for f in $(find $ACTIVE_PROJECT -type f -iname "*.odex"); do
+		local FILE=$(basename $f)
+		local FILEDIR=$(dirname $f)
+		echo "Deodexing $FILE"
+		echo "Disassembling $FILE..."
+		java -Xmx512m -jar tools/smali/baksmali.jar -a $API -d $ACTIVE_PROJECT/system/framework -x $FILEDIR/$FILE
+		if [ $? -ne 0 ]; then
+			echo "ERROR DEODEXING $FILE, ABORTING!"
+			rm -rf out
+			PRESS_ENTER
+			return 1
+		fi
+		echo "Assembling into classes.dex..."
+		java -Xmx512m -jar tools/smali/smali.jar -a $API -o classes.dex out
+		if [ ! -e classes.dex ]; then
+			echo "ERROR DEODEXING $FILE, ABORTING!"
+			rm -rf out
+			PRESS_ENTER
+			return 1
+		fi
+		FILE=$(echo $FILE | rev | cut -d'.' -f2- | rev)
+		local FOUND=false
+		for EXTENSION in "jar" "apk"; do
+			if [ -e $FILEDIR/$FILE.$EXTENSION ]; then
+				echo "Packing back into $FILE.$EXTENSION..."
+				zip -rq $FILEDIR/$FILE.$EXTENSION classes.dex
+				rm -f classes.dex
+				FOUND=true
+				break
+			fi
+		done
+		if (! $FOUND); then
+			echo "ERROR, No output found?!"
+			rm -rf out
+			rm -f classes.dex
+			PRESS_ENTER
+			return 1
+		fi
+		rm -f $f
+		rm -rf out
+	done
+	echo "Deodexing finished"
+	PRESS_ENTER
+}
+
+ZIPALIGN() {
+	for f in $(find $ACTIVE_PROJECT/system -type f -iname "*.apk"); do
+		local FILE=$(basename $f)
+		local FILEDIR=$(dirname $f)
+		echo "Zipaligning $FILE..."
+		tools/zipalign/zipalign -f $ALIGN "$FILEDIR/$FILE" "$FILEDIR/$FILE.zipaligned"
+		mv -f "$FILEDIR/$FILE.zipaligned" "$FILEDIR/$FILE"
+	done
+	echo "Zipaligning finished"
+	PRESS_ENTER
+}
+
+ROOT() {
+	if [ ! -e $ACTIVE_PROJECT/system/xbin/su ]; then
+		mkdir -p $ACTIVE_PROJECT/system/xbin
+		cp -R files/root/system/* $ACTIVE_PROJECT/system/
+		cp -R files/root/$ARCH/system/* $ACTIVE_PROJECT/system/
+		cp $ACTIVE_PROJECT/system/xbin/su $ACTIVE_PROJECT/system/xbin/daemonsu
+		mkdir -p $ACTIVE_PROJECT/system/bin/.ext
+		cp $ACTIVE_PROJECT/system/xbin/su $ACTIVE_PROJECT/system/bin/.ext/su
+		REBUILD_UPDATER-SCRIPT "ADD" "PERMISSIONS" "APPEND" "files/root/updater-script-PERMISSIONS"
+	else
+		rm -f $ACTIVE_PROJECT/system/app/Superuser.apk
+		rm -f $ACTIVE_PROJECT/system/xbin/su
+		rm -f $ACTIVE_PROJECT/system/xbin/daemonsu
+		rm -f $ACTIVE_PROJECT/system/bin/.ext/su
+		rm -f $ACTIVE_PROJECT/system/etc/init.d/99SuperSUDaemon
+		rm -f $ACTIVE_PROJECT/system/etc/.installed_su_daemon
+		REBUILD_UPDATER-SCRIPT "DEL" "PERMISSIONS" "u:object_r:su_exec:s0" #TODO1
+	fi
+	BUILD_UPDATER_SCRIPT
+}
+
+BUSYBOX() {
+	if [ ! -e $ACTIVE_PROJECT/system/xbin/busybox ]; then
+		mkdir -p $ACTIVE_PROJECT/system/xbin
+		cp files/busybox/busybox $ACTIVE_PROJECT/system/xbin/busybox
+		REBUILD_UPDATER-SCRIPT "ADD" "SYMLINK" "APPEND" "files/busybox/updater-script-SYMLINKS"
+		REBUILD_UPDATER-SCRIPT "ADD" "TAIL" "PREPEND" "files/busybox/updater-script-TAIL"
+	else
+		rm -f $ACTIVE_PROJECT/system/xbin/busybox
+		REBUILD_UPDATER-SCRIPT "DEL" "SYMLINK" "busybox" #TODO1
+		REBUILD_UPDATER-SCRIPT "DEL" "TAIL" "busybox" #TODO1
+	fi
+	BUILD_UPDATER_SCRIPT
+}
+
+# Main
+while :; do
+	clear
+
+	echo "Android Kitchen version $VERSION - by JustArchi (@xda-developers.com)"
+	echo "Originally created by dsixda (@xda-developers.com)"
+	echo
+	if [ -z "$ACTIVE_PROJECT" ]; then
+		DO_SETPROJECT
+		continue
+	fi
+
+	echo "-------------------------------------"
+	ALLFINE=true
+	if [ -d $ACTIVE_PROJECT/kernel ]; then
+		ALLFINE=false
+		echo "WARNING: Unpacked kernel found"
+	fi
+	if [ ! -f $ACTIVE_PROJECT/boot.img ]; then
+		ALLFINE=false
+		echo "WARNING: No boot.img found, ROM will not boot properly"
+	fi
+	if [ ! -d $ACTIVE_PROJECT/META-INF ]; then
+		ALLFINE=false
+		echo "WARNING: No META-INF folder found, this is not a ROM"
+	fi
+	echo -n "Project status: "
+	if ($ALLFINE); then
+		echo "OK"
+	else
+		echo "WARNING"
+	fi
+	echo "-------------------------------------"
+
+	echo
+	echo "Architecture: [$ARCH] "
+	echo
+
+	echo -n "ArchiDroid Init.d? "
+	if [ ! -e $ACTIVE_PROJECT/system/bin/debuggerd.real ]; then
+		echo "[NO]"
+	else
+		echo "[YES]"
+	fi
+	echo
+	echo -n "Deodexed? "
+	if [ -e $ACTIVE_PROJECT/system/framework/framework.odex ]; then
+		echo "[NO]"
+	else
+		echo "[YES]"
+	fi
+	echo -n "Zipaligned? "
+	tools/zipalign/zipalign -c $ALIGN $ACTIVE_PROJECT/system/framework/framework-res.apk
+	if [ $? -ne 0 ]; then
+		echo "[NO]"
+	else
+		echo "[YES]"
+	fi
+	echo -n "Rooted? "
+	if [ ! -e $ACTIVE_PROJECT/system/xbin/su ]; then
+		echo "[NO]"
+	else
+		echo "[YES]"
+	fi
+	echo -n "Busybox? "
+	if [ ! -e $ACTIVE_PROJECT/system/xbin/busybox ]; then
+		echo "[NO]"
+	else
+		echo "[YES]"
+	fi
+	echo
+	echo "-------------------------------------------------------------------------------"
+	echo "a - Change architecture (arm/x86)"
+	echo
+	echo "adi - Enable/Disable ArchiDroid indepdendent Init.d (software debuggerd hook)"
+	echo "i - Add Init.d Support (DONT TOUCH YET) (hardware kernel hook)"
+	echo
+	echo "d - Deodex Everything"
+	echo "z - Zipalign Everything"
+	echo "r - Enable/Disable Root"
+	echo "b - Enable/Disable Busybox"
+	echo
+	echo "ku - Unpack kernel"
+	echo "kr - Repack kernel"
+	echo "ka - Abort repacking of kernel"
+	echo
+	echo "bb - Build ROM"
+	echo "x - Exit"
+	echo
+	echo -n "CHOICE: "
+	read CHOICE
+	case "$CHOICE" in
+		"x")
+			exit 0
+			;;
+		"a")
+			CHANGE_ARCHITECTURE
+			;;
+		"adi")
+			ARCHIDROID_INITD
+			;;
+		"d")
+			DEODEX
+			;;
+		"z")
+			ZIPALIGN
+			;;
+		"r")
+			ROOT
+			;;
+		"b")
+			BUSYBOX
+			;;
+		"i")
+			INITD
+			;;
+		"ku")
+			KERNEL_EXTRACT
+			;;
+		"kr")
+			KERNEL_REPACK
+			;;
+		"ka")
+			KERNEL_ABORT
+			;;
+		"bb")
+			if ($ALLFINE); then
+				BUILD
+			else
+				echo "ERROR: Can't build ROM in actual status, please check warings above and correct them!"
+				PRESS_ENTER
+			fi
+			;;
+		*)
+	esac
+done
