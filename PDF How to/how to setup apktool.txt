@@ -1,0 +1,19 @@
+Step one: Root access
+
+jamison904@lapy:~/Desktop$ chown -R jamison904:jamison904 '/home/jamison904/Desktop/aapt' 
+jamison904@lapy:~/Desktop$ chown -R jamison904:jamison904 '/home/jamison904/Desktop/apktool' 
+jamison904@lapy:~/Desktop$ chown -R jamison904:jamison904 '/home/jamison904/Desktop/apktool.jar' 
+jamison904@lapy:~/Desktop$ 
+
+Step two: executble 
+
+jamison904@lapy:~/Desktop$ sudo chmod +x '/home/jamison904/Desktop/aapt' 
+[sudo] password for jamison904: 
+jamison904@lapy:~/Desktop$ sudo chmod +x '/home/jamison904/Desktop/apktool' 
+jamison904@lapy:~/Desktop$ sudo chmod +x '/home/jamison904/Desktop/apktool.jar' jamison904@lapy:~/Desktop$ 
+
+Step 3:
+
+press Alt + F2 and type: gksu nautilus
+then input password.
+last navigate to Usr/local/bin and move all three there and close the window.

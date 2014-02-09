@@ -1,0 +1,938 @@
+[QUOTE=Didact74;34580225][B][SIZE="5"][COLOR="Red"][CENTER]Status Bar Clock Mods [/CENTER][/COLOR][/SIZE][/B]
+
+
+[B][CENTER][SIZE="4"][COLOR="Magenta"][URL="http://forum.xda-developers.com/showthread.php?t=1901407"]ORIGINALTHREAD[/URL][/COLOR][/SIZE][/CENTER][/B]
+
+
+[B][COLOR="Purple"]DEVS, If you want to incorporate this into your ROMs feel free, just shoot me some thanks and some credit.[/COLOR][/B]
+
+I would like to thank the following for helping with these MODs:
+
+[B][U]Jeboo & Shoman94[/U][/B] - They pretty much wrote the toggle portion of the code for the GS2, I just ported over to work with the GS3
+[B][U]RMarkWald[/U][/B] - Helped me straighten out some of the identifiers
+[B][U]Clark44[/U][/B] - General thanks
+
+
+Okay,thats all for that.  Lets get to the good stuff.....
+
+This MOD will do the following based on how you want it to look.
+
+-Center the clock in the Status Bar.
+-Roll the clock out of the way if you get a notification.
+-Make the AM/PM text size a step smaller.
+-Add toggle On/Off functionality in Settings/Time and Date. 
+-Allow you to either toggle on/off am/pm or am/pm & Time all together
+
+This guide assumes you are familiar with de/recompiling.  If you are not, there are a bunch of how-to's floating around.
+
+The following APK's will be modified:
+SystemUI.apk
+SecSettings.apk
+
+We will start with SecSettings.apk
+
+
+[hide]
+[B][COLOR="Magenta"][SIZE="5"]THIS PART OF THE GUIDE WILL ADD THE TOGGLES TO REMOVE AM/PM AND OR TIME.  THIER FUNCTIONALITY CAN BE FOUND IN SETTING/DATE AND TIME[/SIZE][/COLOR][/B]
+
+
+
+Navigate to:
+res/values/public.xml
+
+find the following identifiers:
+[hide][code]
+0x7f0d05f8
+0x7f0d05f9
+0x7f0d05fa
+0x7f0d05fb[/code][/hide]
+
+Change the entire lines to match the ones below in red
+[hide][code]
+    <public type="string" name="tts_default_settings_section" id="0x7f0d05f7" />
+    [COLOR="Red"]<public type="string" name="disable_ampm" id="0x7f0d05f8" />
+    <public type="string" name="disable_ampm_text" id="0x7f0d05f9" />
+    <public type="string" name="disable_time" id="0x7f0d05fa" />
+    <public type="string" name="disable_time_text" id="0x7f0d05fb" />
+[/COLOR]    <public type="string" name="tts_default_pitch_title" id="0x7f0d05fc" />[/code][/hide]
+
+Navigate to:
+res/values/strings.xml
+
+Add the following lines below in red.
+[hide][code]
+    <string name="tts_default_settings_section">Default settings</string>
+    [COLOR="Red"]<string name="disable_ampm">Hide AM/PM</string>
+    <string name="disable_ampm_text">Remove AM/PM from time in status bar</string>
+    <string name="disable_time">Hide Time</string>
+    <string name="disable_time_text">Remove time from status bar</string>
+[/COLOR]    <string name="tts_default_pitch_title">Pitch</string>[/code][/hide]
+
+Navigate to:
+res/xml/date_time_prefs.xml
+
+Add the following below in red
+[hide][code]
+<ListPreference android:title="@string/date_time_date_format" android:key="date_format" android:summary="mm/dd/yyyy" android:widgetLayout="@layout/round_more_icon" />
+    [COLOR="Red"]<CheckBoxPreference android:title="@string/disable_time" android:key="hide_time" android:summary="@string/disable_time_text" />
+    <CheckBoxPreference android:title="@string/disable_ampm" android:key="hide_ampm" android:summary="@string/disable_ampm_text" />[/COLOR]
+</PreferenceScreen>[/code][/hide]
+
+Pause - At this point I suggest you compile SecSettings.apk and push to /system/app to verify the new toggles are in place.  I like to stop every few steps to verify that the APK will at least compile so I know if I have made any mistakes.
+
+Continuing on with SecSettings.apk....
+
+Navigate to:
+smali/com/android/settings/DateTimeSettings.smali
+
+Add the following below in red
+[hide][code]
+.field private mDummyDate:Ljava/util/Calendar;
+
+.[COLOR="red"]field private mHideAmPm:Landroid/preference/Preference;
+
+.field private mHideTime:Landroid/preference/Preference;
+[/COLOR]
+.field private mIntentReceiver:Landroid/content/BroadcastReceiver;[/code][/hide]
+
+Find the following code
+[hide][code]
+iget-object v7, p0, Lcom/android/settings/DateTimeSettings;->mTimePref:Landroid/preference/Preference;
+[/code][/hide]
+
+Starting with the very next line, delete everything up to and including the first ".end Method" you come to and paste the following code in its place
+[hide][code]
+
+if-nez v0, :cond_6
+
+    move v4, v5
+
+    :goto_0
+    invoke-virtual {v7, v4}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    .line 193
+    iget-object v7, p0, Lcom/android/settings/DateTimeSettings;->mDatePref:Landroid/preference/Preference;
+
+    if-nez v0, :cond_7
+
+    move v4, v5
+
+    :goto_1
+    invoke-virtual {v7, v4}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    .line 194
+    iget-object v4, p0, Lcom/android/settings/DateTimeSettings;->mTimeZone:Landroid/preference/Preference;
+
+    if-nez v1, :cond_8
+
+    :goto_2
+    invoke-virtual {v4, v5}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    .line 197
+    invoke-direct {p0}, Lcom/android/settings/DateTimeSettings;->applyEDMDateTimeChangePolicy()V
+
+    const-string v4, "hide_time"
+
+    invoke-virtual {p0, v4}, Lcom/android/settings/DateTimeSettings;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v4
+
+    check-cast v4, Landroid/preference/Preference;
+
+    iput-object v4, p0, Lcom/android/settings/DateTimeSettings;->mHideTime:Landroid/preference/Preference;
+
+    const-string v4, "hide_ampm"
+
+    invoke-virtual {p0, v4}, Lcom/android/settings/DateTimeSettings;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v4
+
+    check-cast v4, Landroid/preference/Preference;
+
+    iput-object v4, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mHideTime:Landroid/preference/Preference;
+
+    check-cast v0, Landroid/preference/CheckBoxPreference;
+
+    invoke-virtual {v0}, Landroid/preference/CheckBoxPreference;->isChecked()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_4
+
+    const/4 v0, 0x0
+
+    iget-object v4, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    invoke-virtual {v4, v0}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    iget-object v4, p0, Lcom/android/settings/DateTimeSettings;->mTime24Pref:Landroid/preference/Preference;
+
+    invoke-virtual {v4, v0}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    :cond_4
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mTime24Pref:Landroid/preference/Preference;
+
+    check-cast v0, Landroid/preference/CheckBoxPreference;
+
+    invoke-virtual {v0}, Landroid/preference/CheckBoxPreference;->isChecked()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_5
+
+    const/4 v0, 0x0
+
+    iget-object v4, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    invoke-virtual {v4, v0}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    :cond_5
+
+    return-void
+
+    :cond_6
+    move v4, v6
+
+    .line 192
+    goto :goto_0
+
+    :cond_7
+    move v4, v6
+
+    .line 193
+    goto :goto_1
+
+    :cond_8
+    move v5, v6
+
+    .line 194
+    goto :goto_2
+.end method[/code][/hide]
+
+Find the following code
+[hide][code]
+.method public onPreferenceTreeClick(Landroid/preference/PreferenceScreen;Landroid/preference/Preference;)Z[/code][/hide]
+
+Starting with the very next line, delete everything up to and including the first ".end Method" you come to and paste the following code in its place
+[hide][code]
+.locals 6
+    .parameter "preferenceScreen"
+    .parameter "preference"
+
+    .prologue
+    const/4 v1, 0x1
+
+    .line 486
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mDatePref:Landroid/preference/Preference;
+
+    if-ne p2, v0, :cond_1
+
+    .line 487
+    const/4 v0, 0x0
+
+    invoke-virtual {p0, v0}, Lcom/android/settings/DateTimeSettings;->showDialog(I)V
+
+    .line 497
+    :cond_0
+    :goto_0
+    invoke-super {p0, p1, p2}, Lcom/android/settings/SettingsPreferenceFragment;->onPreferenceTreeClick(Landroid/preference/PreferenceScreen;Landroid/preference/Preference;)Z
+
+    move-result v0
+
+    return v0
+
+    .line 488
+    :cond_1
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mTimePref:Landroid/preference/Preference;
+
+    if-ne p2, v0, :cond_2
+
+    .line 490
+    invoke-virtual {p0, v1}, Lcom/android/settings/DateTimeSettings;->removeDialog(I)V
+
+    .line 491
+    invoke-virtual {p0, v1}, Lcom/android/settings/DateTimeSettings;->showDialog(I)V
+
+    goto :goto_0
+
+    .line 492
+    :cond_2
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mTime24Pref:Landroid/preference/Preference;
+
+    if-ne p2, v0, :cond_4
+
+
+    .line 493
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mTime24Pref:Landroid/preference/Preference;
+
+    check-cast v0, Landroid/preference/CheckBoxPreference;
+
+    invoke-virtual {v0}, Landroid/preference/CheckBoxPreference;->isChecked()Z
+
+    move-result v0
+
+    invoke-direct {p0, v0}, Lcom/android/settings/DateTimeSettings;->set24Hour(Z)V
+
+    iget-object v1, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    if-nez v0, :cond_3
+
+    const/4 v0, 0x1
+
+    goto :goto_1
+
+    :cond_3
+    const/4 v0, 0x0
+
+    :goto_1
+    invoke-virtual {v1, v0}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    .line 494
+    :goto_2
+    invoke-virtual {p0}, Lcom/android/settings/DateTimeSettings;->getActivity()Landroid/app/Activity;
+
+    move-result-object v0
+
+    invoke-virtual {p0, v0}, Lcom/android/settings/DateTimeSettings;->updateTimeAndDateDisplay(Landroid/content/Context;)V
+
+    .line 495
+    invoke-direct {p0}, Lcom/android/settings/DateTimeSettings;->timeUpdated()V
+
+    goto :goto_0
+
+    :cond_4
+    const-string v3, "hide_ampm"
+
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    if-ne p2, v0, :cond_5
+
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    check-cast v0, Landroid/preference/CheckBoxPreference;
+
+    invoke-virtual {v0}, Landroid/preference/CheckBoxPreference;->isChecked()Z
+
+    move-result v2
+
+    invoke-virtual {p0}, Lcom/android/settings/DateTimeSettings;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v3
+
+    const-string v4, "hide_ampm"
+
+    invoke-static {v3, v4, v2}, Landroid/provider/Settings$System;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
+
+    goto :goto_2
+
+    :cond_5
+    const-string v3, "hide_time"
+
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mHideTime:Landroid/preference/Preference;
+
+    if-ne p2, v0, :cond_0
+
+    iget-object v0, p0, Lcom/android/settings/DateTimeSettings;->mHideTime:Landroid/preference/Preference;
+
+    check-cast v0, Landroid/preference/CheckBoxPreference;
+
+    invoke-virtual {v0}, Landroid/preference/CheckBoxPreference;->isChecked()Z
+
+    move-result v2
+
+    invoke-virtual {p0}, Lcom/android/settings/DateTimeSettings;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v3
+
+    const-string v4, "hide_time"
+
+    invoke-static {v3, v4, v2}, Landroid/provider/Settings$System;->putInt(Landroid/content/ContentResolver;Ljava/lang/String;I)Z
+
+    if-nez v2, :cond_6
+
+    const/4 v2, 0x1
+
+    goto :goto_3
+
+    :cond_6
+    const/4 v2, 0x0
+
+    :goto_3
+    iget-object v1, p0, Lcom/android/settings/DateTimeSettings;->mHideAmPm:Landroid/preference/Preference;
+
+    invoke-virtual {v1, v2}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    iget-object v1, p0, Lcom/android/settings/DateTimeSettings;->mTime24Pref:Landroid/preference/Preference;
+
+    invoke-virtual {v1, v2}, Landroid/preference/Preference;->setEnabled(Z)V
+
+    goto :goto_2
+.end method[/code][/hide]
+
+Thats it for SecSettins.apk.  Recompile and push to /system/app and make sure the toggles are there.  They wont function yet but they should be clickable at this point.
+
+Decompile SystemUI
+
+Navigate to  smali/com/android/systemui/statusbar/policy/clock.smali
+
+In the next step you will basically be C&P'ing the entire method.  If you would like to use your editor to compare code and make only the changes you need thats fine, but for the sake of this guide and time, I am just having you copy and paste the entire method.  I suggest you copy half the code and paste, then copy the other half and paste.  Its too much to copy at one time..
+
+Find the code
+[hide][code]
+.method private final getSmallTime()Ljava/lang/CharSequence;[/code][/hide]
+
+Starting with the very next line, delete everything up to and including the first ".end Method" you come to and paste (half at a time as described above) the following code in its place
+[hide][code]
+.locals 22
+
+
+    invoke-virtual/range {p0 .. p0}, Lcom/android/systemui/statusbar/policy/Clock;->getContext()Landroid/content/Context;
+
+    move-result-object v8
+
+    invoke-virtual {v8}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v2
+
+    const-string v7, "hide_time"
+
+    const/4 v0, 0x0
+
+    invoke-static {v2, v7, v0}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+
+    move-result v7
+
+    const/4 v0, 0x0
+
+    if-eqz v7, :cond_0
+
+    const/16 v0, 0x8
+
+    :cond_0
+    const v1, 0x7f0f0027
+
+    move-object/from16 v2, p0
+
+    invoke-virtual {v2, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
+
+    move-result-object v1
+
+    invoke-virtual {v1, v0}, Landroid/view/View;->setVisibility(I)V
+
+    invoke-static {v8}, Landroid/text/format/DateFormat;->is24HourFormat(Landroid/content/Context;)Z
+
+    move-result v6
+
+    if-eqz v6, :cond_5
+
+    const v16, 0x104007e
+
+    :goto_0
+    const v2, 0xef00
+
+    const v3, 0xef01
+
+    move/from16 v0, v16
+
+    invoke-virtual {v8, v0}, Landroid/content/Context;->getString(I)Ljava/lang/String;
+
+    move-result-object v9
+
+    if-nez v6, :cond_1
+
+    invoke-virtual {v8}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v2
+
+    const-string v3, "hide_ampm"
+
+    const/4 v0, 0x0
+
+    invoke-static {v2, v3, v0}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+
+    move-result v7
+
+    const-string v0, "ampm"
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v2, "getint returned="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1, v7}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Landroid/util/Slog;->i(Ljava/lang/String;Ljava/lang/String;)I
+
+    move v2, v7
+
+    if-eqz v2, :cond_1
+
+    const-string v9, "h:mm"
+
+    :cond_1
+    move-object/from16 v0, p0
+
+    iget-object v0, v0, Lcom/android/systemui/statusbar/policy/Clock;->mClockFormatString:Ljava/lang/String;
+
+    move-object/from16 v20, v0
+
+    move-object/from16 v0, v20
+
+    invoke-virtual {v9, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v20
+
+    if-eqz v20, :cond_2
+
+    if-nez v6, :cond_a
+
+    move-object/from16 v0, p0
+
+    iget-boolean v0, v0, Lcom/android/systemui/statusbar/policy/Clock;->mLocaleChanged:Z
+
+    move/from16 v20, v0
+
+    if-eqz v20, :cond_a
+
+    :cond_2
+    const/16 v20, 0x0
+
+    move/from16 v0, v20
+
+    move-object/from16 v1, p0
+
+    iput-boolean v0, v1, Lcom/android/systemui/statusbar/policy/Clock;->mLocaleChanged:Z
+
+    sget v20, Lcom/android/systemui/statusbar/policy/Clock;->AM_PM_STYLE:I
+
+    if-eqz v20, :cond_9
+
+    const/4 v4, -0x1
+
+    const/4 v15, 0x0
+
+    const/4 v11, 0x0
+
+    :goto_1
+    invoke-virtual {v9}, Ljava/lang/String;->length()I
+
+    move-result v20
+
+    move/from16 v0, v20
+
+    if-ge v11, v0, :cond_4
+
+    invoke-virtual {v9, v11}, Ljava/lang/String;->charAt(I)C
+
+    move-result v7
+
+    const/16 v20, 0x27
+
+    move/from16 v0, v20
+
+    if-ne v7, v0, :cond_3
+
+    if-nez v15, :cond_6
+
+    const/4 v15, 0x1
+
+    :cond_3
+    :goto_2
+    if-nez v15, :cond_7
+
+    const/16 v20, 0x61
+
+    move/from16 v0, v20
+
+    if-ne v7, v0, :cond_7
+
+    move v4, v11
+
+    :cond_4
+    if-ltz v4, :cond_9
+
+    move v5, v4
+
+    :goto_3
+    if-lez v4, :cond_8
+
+    add-int/lit8 v20, v4, -0x1
+
+    move/from16 v0, v20
+
+    invoke-virtual {v9, v0}, Ljava/lang/String;->charAt(I)C
+
+    move-result v20
+
+    invoke-static/range {v20 .. v20}, Ljava/lang/Character;->isWhitespace(C)Z
+
+    move-result v20
+
+    if-eqz v20, :cond_8
+
+    add-int/lit8 v4, v4, -0x1
+
+    goto :goto_3
+
+    :cond_5
+    const v16, 0x104007d
+
+    goto/16 :goto_0
+
+    :cond_6
+    const/4 v15, 0x0
+
+    goto :goto_2
+
+    :cond_7
+    add-int/lit8 v11, v11, 0x1
+
+    goto :goto_1
+
+    :cond_8
+    new-instance v20, Ljava/lang/StringBuilder;
+
+    invoke-direct/range {v20 .. v20}, Ljava/lang/StringBuilder;-><init>()V
+
+    const/16 v21, 0x0
+
+    move/from16 v0, v21
+
+    invoke-virtual {v9, v0, v4}, Ljava/lang/String;->substring(II)Ljava/lang/String;
+
+    move-result-object v21
+
+    invoke-virtual/range {v20 .. v21}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v20
+
+    const v21, 0xef00
+
+    invoke-virtual/range {v20 .. v21}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
+
+    move-result-object v20
+
+    invoke-virtual {v9, v4, v5}, Ljava/lang/String;->substring(II)Ljava/lang/String;
+
+    move-result-object v21
+
+    invoke-virtual/range {v20 .. v21}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v20
+
+    const-string v21, "a"
+
+    invoke-virtual/range {v20 .. v21}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v20
+
+    const v21, 0xef01
+
+    invoke-virtual/range {v20 .. v21}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
+
+    move-result-object v20
+
+    add-int/lit8 v21, v5, 0x1
+
+    move/from16 v0, v21
+
+    invoke-virtual {v9, v0}, Ljava/lang/String;->substring(I)Ljava/lang/String;
+
+    move-result-object v21
+
+    invoke-virtual/range {v20 .. v21}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v20
+
+    invoke-virtual/range {v20 .. v20}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v9
+
+    :cond_9
+    new-instance v18, Ljava/text/SimpleDateFormat;
+
+    move-object/from16 v0, v18
+
+    invoke-direct {v0, v9}, Ljava/text/SimpleDateFormat;-><init>(Ljava/lang/String;)V
+
+    move-object/from16 v0, v18
+
+    move-object/from16 v1, p0
+
+    iput-object v0, v1, Lcom/android/systemui/statusbar/policy/Clock;->mClockFormat:Ljava/text/SimpleDateFormat;
+
+    move-object/from16 v0, p0
+
+    iput-object v9, v0, Lcom/android/systemui/statusbar/policy/Clock;->mClockFormatString:Ljava/lang/String;
+
+    :goto_4
+    move-object/from16 v0, p0
+
+    iget-object v0, v0, Lcom/android/systemui/statusbar/policy/Clock;->mCalendar:Ljava/util/Calendar;
+
+    move-object/from16 v20, v0
+
+    invoke-virtual/range {v20 .. v20}, Ljava/util/Calendar;->getTime()Ljava/util/Date;
+
+    move-result-object v20
+
+    move-object/from16 v0, v18
+
+    move-object/from16 v1, v20
+
+    invoke-virtual {v0, v1}, Ljava/text/SimpleDateFormat;->format(Ljava/util/Date;)Ljava/lang/String;
+
+    move-result-object v17
+
+    sget v20, Lcom/android/systemui/statusbar/policy/Clock;->AM_PM_STYLE:I
+
+    if-eqz v20, :cond_e
+
+    const v20, 0xef00
+
+    move-object/from16 v0, v17
+
+    move/from16 v1, v20
+
+    invoke-virtual {v0, v1}, Ljava/lang/String;->indexOf(I)I
+
+    move-result v12
+
+    const v20, 0xef01
+
+    move-object/from16 v0, v17
+
+    move/from16 v1, v20
+
+    invoke-virtual {v0, v1}, Ljava/lang/String;->indexOf(I)I
+
+    move-result v13
+
+    if-ltz v12, :cond_e
+
+    if-le v13, v12, :cond_e
+
+    new-instance v10, Landroid/text/SpannableStringBuilder;
+
+    move-object/from16 v0, v17
+
+    invoke-direct {v10, v0}, Landroid/text/SpannableStringBuilder;-><init>(Ljava/lang/CharSequence;)V
+
+    sget v20, Lcom/android/systemui/statusbar/policy/Clock;->AM_PM_STYLE:I
+
+    const/16 v21, 0x2
+
+    move/from16 v0, v20
+
+    move/from16 v1, v21
+
+    if-ne v0, v1, :cond_b
+
+    add-int/lit8 v20, v13, 0x1
+
+    move/from16 v0, v20
+
+    invoke-virtual {v10, v12, v0}, Landroid/text/SpannableStringBuilder;->delete(II)Landroid/text/SpannableStringBuilder;
+
+    :goto_5
+    return-object v10
+
+    :cond_a
+    move-object/from16 v0, p0
+
+    iget-object v0, v0, Lcom/android/systemui/statusbar/policy/Clock;->mClockFormat:Ljava/text/SimpleDateFormat;
+
+    move-object/from16 v18, v0
+
+    goto :goto_4
+
+    :cond_b
+    sget v20, Lcom/android/systemui/statusbar/policy/Clock;->AM_PM_STYLE:I
+
+    const/16 v21, 0x1
+
+    move/from16 v0, v20
+
+    move/from16 v1, v21
+
+    if-ne v0, v1, :cond_d
+
+    const v14, 0x3f333333
+
+    sget-boolean v20, Lcom/android/systemui/statusbar/StatusBar;->useTouchWizGUI:Z
+
+    if-eqz v20, :cond_c
+
+    sget-boolean v20, Lcom/android/systemui/statusbar/StatusBar;->canStatusBarHide:Z
+
+    if-nez v20, :cond_c
+
+    const/high16 v14, 0x3f00
+
+    :cond_c
+    new-instance v19, Landroid/text/style/RelativeSizeSpan;
+
+    move-object/from16 v0, v19
+
+    invoke-direct {v0, v14}, Landroid/text/style/RelativeSizeSpan;-><init>(F)V
+
+    const/16 v20, 0x22
+
+    move-object/from16 v0, v19
+
+    move/from16 v1, v20
+
+    invoke-virtual {v10, v0, v12, v13, v1}, Landroid/text/SpannableStringBuilder;->setSpan(Ljava/lang/Object;III)V
+
+    :cond_d
+    add-int/lit8 v20, v13, 0x1
+
+    move/from16 v0, v20
+
+    invoke-virtual {v10, v13, v0}, Landroid/text/SpannableStringBuilder;->delete(II)Landroid/text/SpannableStringBuilder;
+
+    add-int/lit8 v20, v12, 0x1
+
+    move/from16 v0, v20
+
+    invoke-virtual {v10, v12, v0}, Landroid/text/SpannableStringBuilder;->delete(II)Landroid/text/SpannableStringBuilder;
+
+    goto :goto_5
+
+    :cond_e
+    move-object/from16 v10, v17
+
+    goto :goto_5
+.end method[/code][/hide]
+
+Thats it for clock.smali
+
+Navigate to smali/com/android/systemui/statusbar/phone/PhoneStatusBar.smali
+
+Find the code
+[hide][code]
+.method public showClock(Z)V[/code][/hide]
+
+Starting with the very next line, delete everything up to and including the first ".end Method" you come to and paste the following code in its place
+[hide][code]
+.locals 3
+
+    iget-object v1, p0, Lcom/android/systemui/statusbar/phone/PhoneStatusBar;->mStatusBarView:Lcom/android/systemui/statusbar/phone/PhoneStatusBarView;
+
+    const v2, 0x7f0f0027
+
+    invoke-virtual {v1, v2}, Lcom/android/systemui/statusbar/phone/PhoneStatusBarView;->findViewById(I)Landroid/view/View;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_1
+
+    if-eqz p1, :cond_2
+
+    const/4 v1, 0x0
+
+    iget-object v2, p0, Lcom/android/systemui/SystemUI;->mContext:Landroid/content/Context;
+
+    invoke-virtual {v2}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v2
+
+    const-string p0, "hide_time"
+
+    invoke-static {v2, p0, v1}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+
+    move-result v2
+
+    if-eqz v2, :cond_0
+
+    const/16 v1, 0x8
+
+    :cond_0
+    :goto_0
+    invoke-virtual {v0, v1}, Landroid/view/View;->setVisibility(I)V
+
+    :cond_1
+
+    return-void
+
+    :cond_2
+
+    const/16 v1, 0x8
+
+    goto :goto_0
+.end method[/code][/hide]
+
+Thats it for the toggles, if you want you can recompile and push APK's to /system/app or you can continue adding some more functions below.
+
+
+[B][COLOR="Magenta"][SIZE="5"]THIS PART OF THE CODE WILL CENTER THE CLOCK IN THE STATUS BAR[/SIZE][/COLOR][/B]
+
+Still in SystemUI.apk
+
+Navigate to res/layout/tw_status_bar.xml
+
+Find the following code and DELETE it
+[hide][code]
+<com.android.systemui.statusbar.policy.Clock android:textSize="@dimen/status_bar_clock_text_size" android:textColor="#ff959595" android:gravity="left|center" android:id="@id/clock" android:paddingLeft="3.0dip" android:layout_width="wrap_content" android:layout_height="fill_parent" android:singleLine="true" android:includeFontPadding="false" />[/code][/hide]
+
+FInd the following code
+[hide][code]
+xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui">[/code][/hide]
+
+Add this right below it
+[hide][code]
+<LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <com.android.systemui.statusbar.policy.Clock android:textSize="@dimen/status_bar_clock_text_size" android:textColor="#ff959595" android:gravity="center" android:id="@id/clock" android:paddingTop="3.0dip" android:layout_width="wrap_content" android:layout_height="fill_parent" android:singleLine="true" android:includeFontPadding="false" android:layout_weight="1.0" />
+    </LinearLayout>[/code][/hide]
+
+Find the following code
+[hide][code]
+<LinearLayout android:orientation="horizontal" android:id="@id/ticker" android:paddingLeft="6.0dip" android:animationCache="false" android:layout_width="fill_parent" android:layout_height="fill_parent">[/code][/hide]
+
+Change it to this
+[hide][code]
+<LinearLayout android:orientation="horizontal" android:id="@id/ticker" android:background="@drawable/status_bar_bg_tile" android:paddingLeft="6.0dip" android:animationCache="false" android:layout_width="fill_parent" android:layout_height="fill_parent">[/code][/hide]
+
+
+[B][COLOR="Magenta"][SIZE="5"]THIS PART WILL MAKE THE AM/PM A SIZE SMALLER[/SIZE][/COLOR][/B]
+
+Navigate to smali/com/android/systemui/statusbar/policy/clock.smali
+
+Find the following code and remove whats in red and add whats in green
+[hide][code]
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    .prologue
+    .line 78
+   [COLOR="Red"] const/4 v0, 0x0[/COLOR]
+     [COLOR="SeaGreen"]const/4 v0, 0x1[/COLOR]
+
+    sput v0, Lcom/android/systemui/statusbar/policy/Clock;->AM_PM_STYLE:I
+
+    return-void
+.end method[/code][/hide]
+
+Thats it!!
+
+Recompile
+Chmod 644
+Push to /system/app or create a zip and flash away.[/hide]
+
+IF YOU LIKE THIS MOD HIT THE THANKS BUTTON[/QUOTE]
+
+
