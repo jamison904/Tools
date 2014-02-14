@@ -217,8 +217,13 @@ function conky_draw_bg()
 	cairo_set_source_rgba(cr,rgb_to_r_g_b(bg_colour,bg_alpha))
 	cairo_fill(cr)
 end[/code]
-
-[IMG]http://img341.imageshack.us/img341/9464/desk1001.png[/IMG][URL=http://img810.imageshack.us/img810/9441/desk1001.jpg][IMG]http://img810.imageshack.us/img810/9441/desk1001.th.jpg[/IMG][/URL]
+<hr />
+<br />
+<a href="http://img341.imageshack.us/img341/9464/desk1001.png"/a>
+<br />
+<a href="http://img810.imageshack.us/img810/9441/desk1001.jpg"/a>
+<br/>
+<a href="http://img810.imageshack.us/img810/9441/desk1001.th.jpg"/a>
 
 Things you will need to install first.
 
@@ -226,7 +231,7 @@ Things you will need to install first.
 $sudo chmod u+s /usr/sbin/hddtemp
 $sudo sensors-detect #answering Yes (default) to all questions, even that last one that defaults to No[/code]
 
-Now that you have everything installed for conky to work we now need to get the extra icons, download [URL=http://gnome-look.org/content/show.php/CONKY-colors?content=92328]this[/URL] then extract the conky-colors.tar.gz and cd to the folder in the terminal, then run this.
+Now that you have everything installed for conky to work we now need to get the extra icons, download <a href="http://gnome-look.org/content/show.php/CONKY-colors?content=92328">this</a> then extract the conky-colors.tar.gz and cd to the folder in the terminal, then run this.
 
 [code]$make
 $make install[/code]
@@ -236,9 +241,9 @@ To get the forecast info to work we need to install conkyforecast, open the term
 [code]$sudo add-apt-repository ppa:conkyhardcore/ppa
 $sudo apt-get update && sudo apt-get install conkyforecast[/code]
 
-To get the conkyforecast to show your local weather info we need to edit [B].conkyrc[/B] and [B].conkyForecast.config[/B]. Go to this [URL=http://xoap.weather.com/search/search?where=YOUR_CITY]URL[/URL] and replace [B]YOUR_CITY[/B] in the URL address bar with the name of your city. You will see a xml similar to the image below.
+To get the conkyforecast to show your local weather info we need to edit [B].conkyrc[/B] and [B].conkyForecast.config[/B]. Go to this http://xoap.weather.com/search/search?where=YOUR_CITY and replace [B]YOUR_CITY[/B] in the URL address bar with the name of your city. You will see a xml similar to the image below.
 
-[IMG]http://img59.imageshack.us/img59/3518/selection001h.png[/IMG]
+<a href="http://img59.imageshack.us/img59/3518/selection001h.png"/a>
 
 Now that you got the local ID for your area replace all the [B]UKXX0113[/B] with your local ID in the [B].conkyrc[/B] file posted. [I](you can use the "Find and Replace" feature in gedit [B]ctrl-h[/B])[/I]. Also replace [B]XOAP_LICENCE_KEY = UKXX0113[/B] with your local ID in the [B].conkyForecast.config[/B] and change [B]LOCALE = Poole, United Kingdom[/B] with the name of your area, exactly as shown on the page you got your local ID from.
 
