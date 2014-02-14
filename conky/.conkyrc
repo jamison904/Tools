@@ -125,23 +125,23 @@ ${voffset -2}${font Poky:size=13}w${font}${goto 32}${voffset -4}Local IP: ${alig
 ${endif}${else}${voffset 4}${font PizzaDude Bullets:size=12}4${font}${goto 32}Network Unavailable${endif}${endif}
 #${voffset -1}WEATHER ${hr 2}
 
-#${voffset -10}${alignr 56}${font ConkyWeather:style=Bold:size=40}${execi 600 conkyForecast --location=UKXX0113 --datatype=WF --imperial}${font}
-#${voffset -50}${font Weather:size=40}y${font}  ${voffset -38}${font Arial Black:size=26}${execi 600 conkyForecast --location=UKXX0113 --datatype=HT --imperial}${font}
+#${voffset -10}${alignr 56}${font ConkyWeather:style=Bold:size=40}${execi 600 conkyForecast --location=USFL0228 --datatype=WF --imperial}${font}
+#${voffset -50}${font Weather:size=40}y${font}  ${voffset -38}${font Arial Black:size=26}${execi 600 conkyForecast --location=USFL0228 --datatype=HT --imperial}${font}
 
-#${alignc 43}${execpi 600 conkyForecast --location=UKXX0113 --datatype=DW --imperial --startday=1 --shortweekday} ${alignc 8}${execpi 600 conkyForecast --location=UKXX0113 --datatype=DW --imperial --startday=2 --shortweekday} ${alignc -29}${execpi 600 conkyForecast --location=UKXX0113 --datatype=DW --imperial --startday=3 --shortweekday} ${alignc -64}${execpi 600 conkyForecast --location=UKXX0113 --datatype=DW --imperial --startday=4 --shortweekday}
-#${alignc 75}${font ConkyWeather:size=28}${execpi 600 conkyForecast --location=UKXX0113 --datatype=WF --imperial --startday=1 --endday=4 --spaces=1}${font}
-#${font DejaVu Sans:size=7}${alignc 48}${execpi 600 conkyForecast --location=UKXX0113 --datatype=HT --imperial --startday=1 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=UKXX0113 --datatype=LT --imperial --startday=1 --hideunits --centeredwidth=3} ${alignc -14}${execpi 600 conkyForecast --location=UKXX0113 --datatype=HT --imperial --startday=2 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=UKXX0113 --datatype=LT --imperial --startday=2 --hideunits --centeredwidth=3} ${alignc -40}${execpi 600 conkyForecast --location=UKXX0113 --datatype=HT --imperial --startday=3 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=UKXX0113 --datatype=LT --imperial --startday=3 --hideunits --centeredwidth=3} ${alignr 6}${execpi 600 conkyForecast --location=UKXX0113 --datatype=HT --imperial --startday=4 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=UKXX0113 --datatype=LT --imperial --startday=4 --hideunits --centeredwidth=3}${font}
-#${voffset 4}Location:${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=CN}
-#Last Updated: ${alignr} ${execi 600 conkyForecast --location=UKXX0113 --hideunits --datatype=LU -m 0 }
-#Feels Like:${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=LT --imperial}
-#Dew Point: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=DP --imperial}
-#Current Condition:${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=CC}
-#Chance of Precip: ${alignr}${execi 600 conkyForecast  --location=UKXX0113 --startday=0 --datatype=PC}
-#Humidity: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=HM}
-#Wind: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=WS --imperial} - ${execi 600 conkyForecast --location=UKXX0113 --datatype=WD}
-#Pressure: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --hideunits --datatype=BR}
-#Visibility: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=VI --imperial}
-#Sunrise: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=SR}
-#Sunset: ${alignr}${execi 600 conkyForecast --location=UKXX0113 --datatype=SS}
-#Moon Phase:${alignr 8}${execi 600 conkyForecast --location=UKXX0113 --datatype=MP} ${font MoonPhases:size=8}${execi 600 conkyForecast --location=UKXX0113 --datatype=MF}${font}
+#${alignc 43}${execpi 600 conkyForecast --location=USFL0228 --datatype=DW --imperial --startday=1 --shortweekday} ${alignc 8}${execpi 600 conkyForecast --location=USFL0228 --datatype=DW --imperial --startday=2 --shortweekday} ${alignc -29}${execpi 600 conkyForecast --location=USFL0228 --datatype=DW --imperial --startday=3 --shortweekday} ${alignc -64}${execpi 600 conkyForecast --location=USFL0228 --datatype=DW --imperial --startday=4 --shortweekday}
+#${alignc 75}${font ConkyWeather:size=28}${execpi 600 conkyForecast --location=USFL0228 --datatype=WF --imperial --startday=1 --endday=4 --spaces=1}${font}
+#${font DejaVu Sans:size=7}${alignc 48}${execpi 600 conkyForecast --location=USFL0228 --datatype=HT --imperial --startday=1 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=USFL0228 --datatype=LT --imperial --startday=1 --hideunits --centeredwidth=3} ${alignc -14}${execpi 600 conkyForecast --location=USFL0228 --datatype=HT --imperial --startday=2 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=USFL0228 --datatype=LT --imperial --startday=2 --hideunits --centeredwidth=3} ${alignc -40}${execpi 600 conkyForecast --location=USFL0228 --datatype=HT --imperial --startday=3 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=USFL0228 --datatype=LT --imperial --startday=3 --hideunits --centeredwidth=3} ${alignr 6}${execpi 600 conkyForecast --location=USFL0228 --datatype=HT --imperial --startday=4 --hideunits --centeredwidth=3}/${execpi 600 conkyForecast --location=USFL0228 --datatype=LT --imperial --startday=4 --hideunits --centeredwidth=3}${font}
+#${voffset 4}Location:${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=CN}
+#Last Updated: ${alignr} ${execi 600 conkyForecast --location=USFL0228 --hideunits --datatype=LU -m 0 }
+#Feels Like:${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=LT --imperial}
+#Dew Point: ${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=DP --imperial}
+#Current Condition:${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=CC}
+#Chance of Precip: ${alignr}${execi 600 conkyForecast  --location=USFL0228 --startday=0 --datatype=PC}
+#Humidity: ${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=HM}
+#Wind: ${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=WS --imperial} - ${execi 600 conkyForecast --location=USFL0228 --datatype=WD}
+#Pressure: ${alignr}${execi 600 conkyForecast --location=USFL0228 --hideunits --datatype=BR}
+#Visibility: ${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=VI --imperial}
+#Sunrise: ${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=SR}
+#Sunset: ${alignr}${execi 600 conkyForecast --location=USFL0228 --datatype=SS}
+#Moon Phase:${alignr 8}${execi 600 conkyForecast --location=USFL0228 --datatype=MP} ${font MoonPhases:size=8}${execi 600 conkyForecast --location=USFL0228 --datatype=MF}${font}
 ${hr 2}
