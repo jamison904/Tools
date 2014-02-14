@@ -68,9 +68,9 @@ ${goto 40}Kernel: ${kernel}
 ${hr 2} 
 
 ${goto 6}${font StyleBats:size=16}A${font}${voffset -4}${goto 32}CPU1: ${cpu cpu0}% ${alignr}${cpubar cpu0 8,60}
-${goto 6}${voffset 4}${font StyleBats:size=16}A${font}${voffset -4}${goto 32}CPU2: ${cpu cpu1}% ${alignr}${cpubar cpu1 8,60}
-#${goto 6}${voffset 4}${font StyleBats:size=16}A${font}${voffset -4}${goto 32}CPU3: ${cpu cpu2}% ${alignr}${cpubar cpu2 8,60}
-#${goto 6}${voffset 4}${font StyleBats:size=16}A${font}${voffset -4}${goto 32}CPU4: ${cpu cpu3}% ${alignr}${cpubar cpu3 8,60}
+${goto 6}${voffset 4}${font StyleBats:size=16}B${font}${voffset -4}${goto 32}CPU2: ${cpu cpu1}% ${alignr}${cpubar cpu1 8,60}
+${goto 6}${voffset 4}${font StyleBats:size=16}C${font}${voffset -4}${goto 32}CPU3: ${cpu cpu2}% ${alignr}${cpubar cpu2 8,60}
+${goto 6}${voffset 4}${font StyleBats:size=16}D${font}${voffset -4}${goto 32}CPU4: ${cpu cpu3}% ${alignr}${cpubar cpu3 8,60}
 ${goto 6}${voffset 4}${font StyleBats:size=16}g${font}${voffset -4}${goto 32}RAM: ${mem} ${alignr}${membar 8,60}
 ${goto 6}${voffset 4}${font StyleBats:size=16}x${font}${voffset -4}${goto 32}DISK: ${diskio}${alignr}${diskiograph 8,60 F57900 FCAF3E}
 ${goto 6}${voffset 4}${font StyleBats:size=16}j${font}${voffset -4}${goto 32}SWAP: $swapperc% ${alignr}${swapbar 8,60}
