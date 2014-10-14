@@ -1,0 +1,11 @@
+For Chrome:
+
+1) Install gconf-editor (sudo apt-get install gconf-editor). 
+2) Press ALT+F2 and type gconf-editor. 
+3) Navigate to /apps/docky-2 - note that Docky should not be running (or it may override your changes) and that any changes made require a restart of Docky. 
+4) navigate to /apps/docky-2/Docky/Interface/DockPreferences/Dockn
+5) go to -> Launchers
+6) add the comma-separated path: file:////usr/share/applications/google-chrome.desktop
+7) close gconf-editor and restart docky. 
+glasses If it doesn't show up, you maybe have to create the /usr/share/applications/google-chrome.desktop file as root. Check if you actually have it: cat /usr/share/applications/google-chrome.desktop
+9) If not, you can use Iceweasel's desktop file and modify the path and save it to google-chrome.desktop

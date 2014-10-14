@@ -1,0 +1,49 @@
+[QUOTE=Jamison904;39491864][indent][SIZE="7"][COLOR="Red"]Developer's Work shop[/COLOR][/SIZE][/indent]
+
+
+[B][indent][indent]
+How to setup a development environment for nOobs, How to make a basic ROM from Samsung's stock firmware, how to setup and use the apktool, how to compile AOKP for the d2tmo (T-Mobile S3), how to port to an unsupported device for AOSP/CM/AOKP coming....
+
+
+
+Table of contents
+[LIST]
+[*] Setting up Linux and a developers environment how to for Linux - post 2
+[*] Android Kitchen how to for Linux - post 3
+[*] Apktool how to for Linux - post 4
+[*] Manually decompile and recompile smali, jar's and even apks' how to for Linux - post 4
+[*] How to compile AOKP for d2tmo (T-mobile S3) - post 5
+[*] How to cherry pick - post 5  Thanks to [COLOR="Red"]Midnight_Rider[/COLOR] - post 5
+[*] How to compile a kernel for d2tmo (T-mobile S3) - post 6
+[/list]
+
+
+
+[center]
+[code]
+#include 
+/*
+* Your warranty is now void.
+*
+* I am not responsible for bricked devices, dead SD cards,
+* thermonuclear war, or you getting fired because the alarm app failed. Please
+* do some research if you have any concerns about features included in this ROM
+* before flashing it! YOU are choosing to make these modifications, and if
+* you point the finger at me for messing up your device, I will laugh at you.
+*/
+
+By using these guides you agree with the above terms!
+[/code]
+
+
+
+
+
+
+
+
+
+
+[URL="http://forum.xda-developers.com/donatetome.php?u=1823993"][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/Donate.png[/IMG][/URL][/center][/indent][/indent][/B][/QUOTE]
+
+

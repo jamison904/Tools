@@ -1,0 +1,210 @@
+[quote][b][color=red]Apktool how to for Linux: [/color][/b][/quote]
+
+[hide]
+[quote][url]http://forum.xda-developers.com/showthread.php?t=1755243[/url] First go here to [b]iBotPeaches[/b]'s Apktool thread.
+
+Sidenote: check out the change log here and apply where needed. [url]http://code.google.com/p/android-apktool/wiki/Changelog[/url][/quote]
+
+
+[quote] - Now download the apktool here: [url]http://android-apktool.googlecode.com/files/apktool1.5.1.tar.bz2[/url]
+
+- Then go here and download the needed package for the OS you are running (Linux) [url]http://code.google.com/p/android-apktool/downloads/list[/url]
+
+[/quote]
+
+[quote] Now extra both zip's to your desktop.
+
+- Now open the terminal and navigate to the desktop. (or go to Ubuntu software center and search "right click terminal" and download it.
+
+- No that you are in desktop in the terminal you need to give each of the three files root access.
+
+- to do this you will need to chown -R and type the location of the file.:
+
+[code]
+
+chown -R 
+
+[/code]
+
+- The quickest and easiest way to type "chown -R " then the location (jamison904:jamison904) then drag and drop the file into the terminal. So it will look like this (also it will prompt you for your password.)
+
+example:
+
+[code]
+
+jamison904@lapy:~/Desktop$ chown -R jamison904:jamison904 '/home/jamison904/Desktop/aapt' 
+jamison904@lapy:~/Desktop$ chown -R jamison904:jamison904 '/home/jamison904/Desktop/apktool' 
+jamison904@lapy:~/Desktop$ chown -R jamison904:jamison904 '/home/jamison904/Desktop/apktool.jar' 
+
+[/code]
+
+[b]jamison904:jamison904[/b] = your user name.
+
+If this doesn't work for the verision of Linux you are on you should try this as well:
+
+[code]
+
+jamison904@lapy:~/Desktop$ chown -R  '/home/jamison904/Desktop/aapt' 
+jamison904@lapy:~/Desktop$ chown -R  '/home/jamison904/Desktop/apktool' 
+jamison904@lapy:~/Desktop$ chown -R  '/home/jamison904/Desktop/apktool.jar' 
+
+[/code]
+[/quote]
+
+[quote]
+
+- Now we have to make each executable by sudo chmod +x
+
+[code]
+
+sudo chmod +x
+
+[/code]
+
+[b]It will look like this:[/b]
+
+[code]
+
+jamison904@lapy:~/Desktop$ sudo chmod +x '/home/jamison904/Desktop/aapt' 
+
+[sudo] password for jamison904: 
+
+jamison904@lapy:~/Desktop$ sudo chmod +x '/home/jamison904/Desktop/apktool' 
+
+jamison904@lapy:~/Desktop$ sudo chmod +x '/home/jamison904/Desktop/apktool.jar'
+
+
+ [/code]
+
+Now to be sure right click each one and click properties then click the Permissions tab and make sure "allow executing file as program" is clicked. 
+
+
+
+[/quote]
+
+
+[quote]
+- Last we have to move all three to Usr/local/bin. BUT you have to be running as root to do this...
+
+- So to do this you will need to[i][b] press Alt + F2 and type: gksu nautilus[/b][/i]
+
+- Now navigte to Usr/local/bin and drag and drop all three here. Now close that window.
+[/quote]
+
+[b]Done with the setup. Now a quick how to use it[/b]
+
+
+[quote] How to use:
+
+- Open the terminal in the same folder as the apps you want to mod. I normally take the app an the frameworks and place them in a folder on the desktop. I name it whatever the project is. i.e. "Toggles mod"
+
+- now you will need add the framerork-res.apk and the twframework-res.apk to the apktool.
+
+[code]
+
+apktool if framework-res.apk   <- enter, then
+apktool if twframework-res.apk  <- enter
+
+[/code]
+
+Now you need to decompile the apk you are working on, lets say the SystemUI.apk
+
+[code]
+
+apktool d SystemUI.apk   <- enter
+
+[/code]
+
+At this point you will make your modifications. . . . then you will need to recompile the apk.
+
+[code]
+
+apktool b SystemUI   <- enter
+
+[/code]
+
+Now if all goes well you will have a new modded apk. One more step and you're done. 
+
+[/quote]
+
+
+[quote]
+
+- Last you will need to open the archive of both the orignal apk and your new modded apk.
+
+-  Grab the [b]META-INF [/b]folder and the [b]original AndroidManifest.xml[/b] from the original apk and drag and drop both into your new modded apk then close the archive.
+
+- I have attached a test zip for you to use. Just place the apk or jar where it goes. ie...SystemUI.apk goes into system/app and framework-res.apk goes into system/framework. Just double click the zip and go to the folder the apk or jar goes to and drag and drop it in then just close the archive. No signing needed this way. :cool:
+
+
+
+[/quote][/hide]
+
+
+
+
+
+[quote][b][color=red]Manually decompile and recompile smali, jar's and even apks' how to for Linux: [/color][/b][/quote]
+
+[hide]
+[COLOR="Red"]First off, huge shout out and thanks to Jesusfreke!!! Without him none of this would be possible. [/COLOR]
+
+[INDENT][INDENT][b]
+First head over to [URL="http://code.google.com/p/smali/downloads/list"]download section[/URL] and download 
+[code]
+baksmali-1.4.2.jar
+smali-1.4.2.jar
+[/code]
+
+then rename them to
+[code]
+baksmali.jar
+smali.jar
+[/code]
+
+Now make a new folder. I named mine smali. Place both into the new folder.[/INDENT][/INDENT]
+
+
+[INDENT]
+Next go to Ubuntu software center and download 7zip.
+
+Lets use the android.policy.jar as an example for this part of the guide.
+
+Take the android.policy.jar and place it into the new folder (smali)
+
+double click on the android.policy.jar to open the archive. Then click on the class.dex and drag it and drop into the folder (smali)
+
+[/INDENT]
+
+[INDENT][INDENT]
+Now for the fun part.
+
+Right click and open terminal here inside the folder. (If you haven't got it yet please do. Go to Ubuntu software center and download right click terminal.)
+
+Now you type this or copy and paste:
+[code]
+java -jar baksmali.jar -o classout/ classes.dex
+[/code]
+
+this will decompile the class.dex to a folder named class. Make your changes then continue. 
+[/INDENT]
+
+[INDENT]
+
+Now to recompile you will type or copy and paste:
+[code]
+java -Xmx512M -jar smali.jar classout/ -o new-classes.dex
+[/code]
+
+This will give you the output of new-classes.dex. If you get any errors or don't get a "new-classes.dex" then you had an error. Copy what the terminal says and paste it here and I will help you figure it out. [COLOR="Red"]If it is long please paste it over at pastebin.com and post a link here. Trying to keep it clean in here. [/COLOR]Thanks!
+
+
+You will want to copy the android.policy.jar and the new-classes.dex to a new folder inside the folder you have been working. I name this folder Test1. This way you don't overwrite the stock ones. Plus makes it easiser to keep track of what worked and what did not.
+[/INDENT][/INDENT]
+
+[INDENT]
+Now all you need to to is double click on the android.policy.jar to open the archive again. Now since you are in the Test1 folder rename new-classes.dex to
+classes.dex. Last just drag classes.dex to the archive and drop it. It will add the new classes.dex to the archive. Once it is done close the archive and test to see if your chages worked. 
+
+I have attached a test zip for you to use. Just place the apk or jar where it goes. ie...SystemUI.apk goes into system/app and framework-res.apk goes into system/framework. Just double click the zip and go to the folder the apk or jar goes to and drag and drop it in then just close the archive. No signing needed this way. :cool:
+[/INDENT][/b][/hide]

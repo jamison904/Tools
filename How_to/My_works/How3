@@ -1,0 +1,499 @@
+[quote][b][color=red]Android Kitchen how to for Linux: [/color][/b][/quote]
+
+[hide]
+[code] This is a rough draft and I will clean it up and make it look pretty later... :cool: [/code]
+
+OK guys this is a step by step "How to"
+
+The goal is to teach you how to take a stock firmware from Samsung and convert it into a custom ROM that anyone can download and flash through a custom recovery like ClockWorksMod (CWM.) 
+
+[quote] - First off this guide is written for Linux. I am personally using Ubuntu 12.04 at the moment. I really don't believe Android development should be done on Windows so I will not be writing a Windows version of this guide. That being said, I don't have an issue with someone else writing one and using this to convert to as long as it is posted here![/quote]
+
+[quote] - At this point I am going to assume you are running Linux and have some basic understanding of it. Now you will need to have Java and Android SDK installed. I have written a "HOW TO" above [/quote]
+
+_____
+
+[quote] - First you will need to download Samsung's stock firmware. You can get it from here [url]http://www.sammobile.com/firmware/?page=3&model=SGH-T999&pcode=TMB&os=1&type=1[/url]  This is Jelly Bean for the T-Mobile S3, but you can use this site to download the stock firmware for any other Samsung devices.[/quote]
+
+[quote] - Now you need to download dsixda's Android Kitchen (be sure to thank him!) [url]http://forum.xda-developers.com/showthread.php?t=1939420[/url][/quote]
+
+[quote] - Now make a folder to keep everything and so you know where everything is. I named mine [b]"Development."[/b][/quote]
+
+[quote] - extract dsixda's Android Kitchen into this folder.[/quote]
+
+[quote] - extract Samsung's firmware, then extract the .tar. Now move the boot.img, System.img and the cache.img to a folder called "[b]original_update[/b]" inside the Android kitchen.[/quote]
+
+[quote] - Now rick click on menu inside the kitchen and go to properties,  permissions and make it excitable. Then double click it and select run in terminal.[/quote]
+
+
+============================================================
+ Android Kitchen 0.223 - by dsixda (xda-developers.com)
+============================================================
+
+> MAIN MENU
+
+  1 - Set up working folder from ROM
+  2 - Add root permissions
+  3 - Add BusyBox
+  4 - Disable boot screen sounds
+  5 - Zipalign all *.apk files to optimize RAM usage
+  6 - Change wipe status of ROM
+  7 - Change name of ROM
+  8 - Show working folder information
+
+  0 - ADVANCED OPTIONS
+ 00 - LEGACY OPTIONS (old and rarely used)
+ 99 - Build ROM from working folder
+
+  u - Kitchen Info/Update/Donate
+  x - Exit
+
+
+Enter option: 
+
+
+[quote] Now input option # 1 which goes to:[/quote]
+
+CREATE WORKING FOLDER FOR ROM
+==============================
+
+Ensure there is at least one ROM under the 'original_update' folder!
+
+Select an option:
+
+ s - Show supported formats
+ x - Abort, don't create working folder
+
+Or press Enter to continue
+
+? 
+
+[quote]
+pick [b][color=red]S[/b][/color] to read or enter to go on...(enter!) [/quote]
+
+? s
+
+----------------------------------------------------------------------
+
+The format for each ROM must be one of the following:
+ 
+ - system.img + optional boot.img/lib.img (e.g. stock ROM or Nandroid)
+ - ZIP file for a custom ROM              (e.g. update.zip)
+ - ZIP file containing *.img              (e.g. stock rom.zip)
+ - ZIP file containing shipped ROM in SYSTEM + BOOT folder format
+ - Working folder made with this kitchen  (e.g. WORKING_old_rom)
+ 
+ Other formats:
+ 
+ Samsung Galaxy S:
+ - factoryfs.rfs + optional cache.rfs/zImage
+ - PDA.tar.md5 + optional CSC.tar.md5/PHONE.tar.md5
+ - PDA.tar + optional CSC.tar/PHONE.tar
+ - TAR/ZIP file containing factoryfs.rfs + more 
+ - TAR/ZIP file containing PDA.tar.md5/PDA.tar + more
+
+ Samsung Galaxy S Plus:
+ - system.img.ext4 + optional cache.img.ext4/boot.img
+ - TAR/ZIP file containing system.img.ext4 + more 
+ 
+ Samsung Galaxy SII:
+ - factoryfs.img + optional cache.img/zImage  
+ - system.img.ext4 + optional cache.img.ext4/boot.img
+ - TAR/ZIP file containing factoryfs.img/system.img.ext4 + more 
+ - system.ext4.tar + optional boot.img (Nandroid backup)
+ 
+ Huawei:
+ - APP file from Huawei software update (e.g. UPDATE.APP)
+
+ ----------------------------------------------------------------------
+
+[quote] what I currently have working[/quote]
+
+Available ROMs:
+
+  (1)
+  (2) Deodexed_T999UVDLI8.zip
+  (3) Deodexed_T999UVDLI6_1.zip
+  (4) system.img.ext4, cache.img.ext4 and boot.img [b][color=red]<- What you are looking for![/color][/b]
+  (5) WORKING_S3_16
+  (6) WORKING_S3_toggles
+  (7) WORKING_S3
+  (8) WORKING_note
+
+Enter selection number (default=1, cancel=0, r=refresh):
+
+[quote] then after inputting the right selection you will see: [/quote]
+
+Available ROMs:
+
+  (1) 
+  (2) Deodexed_T999UVDLI8.zip
+  (3) Deodexed_T999UVDLI6_1.zip
+  (4) system.img.ext4, cache.img.ext4 and boot.img
+  (5) WORKING_S3_16
+  (6) WORKING_S3_toggles
+  (7) WORKING_S3
+  (8) WORKING_note
+
+Enter selection number (default=1, cancel=0, r=refresh): 4
+
+Found original_update/system.img.ext4
+Found original_update/cache.img.ext4
+Found original_update/boot.img
+
+The new working folder will be named WORKING_112412_232858
+Change the name (y/n)? (default: n): 
+
+[quote] [b]y[/b] <- here, and name [b][color=red]WORKING_Hello_world[/color][/b][/quote]
+
+
+Creating working folder WORKING_Hello_world...
+Copying boot.img ...
+
+
+Analyzing system.img.ext4 ...
+Analyzing cache.img.ext4 ...
+
+Compiling simg2img ...
+simg2img successfully compiled
+
+Converting system.img.ext4 into a format for unpacking ...
+
+Adding an update-script ...
+
+Mounting ext4_system.img to loopback device and then extracting files ...
+[sudo] password for jamison904: [b][color=red]<- input YOUR password and enter[/color][/b]
+
+____
+
+[quote]Now it will ask if you want to see the details of your ROM[/quote]
+
+Working folder information
+
+ Android OS version             : 4.1.1
+ Device                         : d2tmo
+ Model                          : SGH-T999
+ ROM Name                       : JRO03L.T999UVDLJA
+ Rooted (Superuser.apk + su)    : NO
+ Rooted (unsecured boot.img)    : NO
+ BusyBox installed              : NO
+ BusyBox run-parts support      : NO
+ Apps2SD (Apps to EXT) enabled  : NO
+ /data/app enabled              : NO
+ Custom boot animation allowed  : NO
+ Nano text editor installed     : NO
+ Bash shell support             : NO
+ /system/framework is deodexed  : NO
+ /system/app is deodexed        : NO
+ radio.img found                : NO
+ ROM will wipe all data         : NO
+
+
+Press Enter to continue
+
+
+[quote]Now select # 2 to add Root! Then option [b][color=red]"F"[/color][/b][/quote]
+
+ROOTING
+--------------------------------------------
+
+The following will be done for root:
+
+- Add Superuser.apk and su
+- Add necessary lines to the update-script
+- Update default.prop in the ramdisk
+
+--------------------------------------------
+
+Which version of the Superuser package do you want
+to install?
+
+ f - ChainsDD's version          (Android 2.x+)
+ s - Old and simple version      (All Android)
+
+ x - Cancel rooting              (default)
+
+? 
+
+[quote] ok... then #3 for busy box and # 7 to change the name of your ROM[/quote]
+
+The current name of the ROM is:
+
+JRO03L.T999UVDLJA
+
+
+Would you like to rename it (y/n)? (default: y): y
+
+Please enter the new name: [b][color=red]Hello World![/color][/b]
+
+[quote] Hit option 8 again for the ROM INFO:[/quote]
+
+Working folder information
+
+ Android OS version             : 4.1.1
+ Device                         : d2tmo
+ Model                          : SGH-T999
+ ROM Name                       : [b][color=red]Hello World![/color][/b]
+ Rooted (Superuser.apk + su)    : YES
+ Rooted (unsecured boot.img)    : YES
+ BusyBox installed              : YES
+ BusyBox run-parts support      : NO
+ Apps2SD (Apps to EXT) enabled  : NO
+ /data/app enabled              : NO
+ Custom boot animation allowed  : NO
+ Nano text editor installed     : NO
+ Bash shell support             : NO
+ /system/framework is deodexed  : NO
+ /system/app is deodexed        : NO
+ radio.img found                : NO
+ ROM will wipe all data         : NO
+
+
+Press Enter to continue
+
+
+[quote] Ok now "0" for advanced[/quote]
+
+============================================================
+ Android Kitchen 0.223 - by dsixda (xda-developers.com)
+============================================================
+
+> ADVANCED OPTIONS
+
+ 11 - De-odex files in your ROM
+ 12 - Tools for boot image (unpack/re-pack/etc.)
+ 13 - Add /data/app functionality
+ 14 - Add /etc/init.d scripts support (busybox run-parts)
+ 15 - Unpack data.img
+ 16 - Sign APK or ZIP file(s)
+ 17 - Convert update-script or updater-script
+ 18 - Plugin scripts
+
+ 99 - Build ROM from working folder
+  0 - BACK TO MAIN MENU
+
+Enter option: 
+
+[quote]Now select #11 to Deodex files in your ROM to make customization possible![/quote]
+
+The process usually takes several minutes and does NOT require
+you to sign any of the files afterwards.
+
+----------------------------------------------------------------
+
+Found 49 *.odex files in system/framework
+Found 133 *.odex files in system/app
+
+Enter a choice:
+
+ bb  = Back up both folders (do first!)
+  v  = Set Android OS version (Current API level = 15)
+
+       IMPORTANT: Ensure you set the correct API level
+
+  f  = Deodex /system/framework
+  a  = Deodex /system/app
+  b  = Deodex both folders (recommended)
+  s  = Deodex a single file
+  x  = Exit
+
+? 
+
+[quote] First set the compression level for the Android version you are working on, ie. 4.2.2 = 17[/quote]
+
+[quote] Now seclect [b]"b"[/b] for both folders[/quote]
+
+
+============================================================
+ Android Kitchen 0.223 - by dsixda (xda-developers.com)
+============================================================
+
+> ADVANCED OPTIONS
+
+ 11 - De-odex files in your ROM
+ 12 - Tools for boot image (unpack/re-pack/etc.)
+ 13 - Add /data/app functionality
+ 14 - Add /etc/init.d scripts support (busybox run-parts)
+ 15 - Unpack data.img
+ 16 - Sign APK or ZIP file(s)
+ 17 - Convert update-script or updater-script
+ 18 - Plugin scripts
+
+ 99 - Build ROM from working folder
+  0 - BACK TO MAIN MENU
+
+
+Enter option: 
+
+[quote] Now do 13 - Add /data/app functionality  and  14 -  Add /etc/init.d scripts support (busybox run-parts)
+[/quote]
+
+[quote][b][color=red] ~ More advanced tweaks and other tips coming later in next post....[/color][/b][/quote]
+
+[quote] Now at this point after making your tweaks and changes, you will select option # 99. After that I am normally running after my daughter so I pick option # 2 which automates the zipping, signing, and naming process[/quote]
+
+[INDENT][INDENT]
+
+[COLOR="Red"][B]Now very import before you flash!! Make sure you compare the blocks from my installer script and the one you have from the kitchen. Make sure that yours has this information and nothing else or you will end up with a soft brick or even a hard brick with no return!![/B][/COLOR]
+
+[code]
+/dev/block/mmcblk0p14 - for system
+/dev/block/mmcblk0p17 - for cache
+/dev/block/mmcblk0p15 - for data
+/dev/block/mmcblk0p7 - for the boot.img (kernel)
+[/code]
+
+[Hide][code]
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print("**************************");
+ui_print("*                        *");
+ui_print("*       INFAMOUS S3      *");
+ui_print("*           BY           *");
+ui_print("*       JAMISON904       *");
+ui_print("*                        *");
+ui_print("**************************");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print(" ");
+ui_print("Deleting stuff... ");
+show_progress(0.999999, 99);
+unmount("/system");
+format("ext4", "EMMC", "/dev/block/mmcblk0p14", "0");
+mount("ext4", "EMMC", "/dev/block/mmcblk0p14", "/system");
+mount("ext4", "EMMC", "/dev/block/mmcblk0p17", "/cache");
+delete_recursive("/cache");
+delete_recursive("/data/dalvik-cache");
+delete_recursive("/sdcard/.adobe");
+delete_recursive("/sdcard/.adobe-digital-editions");
+delete_recursive("/sdcard/.android_secure");
+delete_recursive("/sdcard/bugreports");
+delete_recursive("/sdcard/LOST.DIR");
+delete_recursive("/sdcard/tmp");
+mount("ext4", "EMMC", "/dev/block/mmcblk0p15", "/data");
+package_extract_dir("data", "/data");
+set_perm_recursive(1000, 1000, 0771, 0644, "/data/app");
+delete_recursive("/data/dalvik-cache");
+ 
+ui_print("Installing the System");
+package_extract_dir("system", "/system");
+set_perm(0, 1000, 0755, "/system/xbin/busybox");
+run_program("/system/xbin/busybox", "--install", "-s", "/system/xbin");
+symlink("/system/xbin/busybox", "/system/bin/busybox");
+ui_print("Setting Symlinks");
+symlink("toolbox", "/system/bin/df");
+symlink("toolbox", "/system/bin/dmesg");
+symlink("toolbox", "/system/bin/insmod");
+symlink("toolbox", "/system/bin/log");
+symlink("toolbox", "/system/bin/rmdir");
+symlink("toolbox", "/system/bin/schedtop");
+symlink("toolbox", "/system/bin/route");
+symlink("toolbox", "/system/bin/netstat");
+symlink("toolbox", "/system/bin/hd");
+symlink("toolbox", "/system/bin/umount");
+symlink("toolbox", "/system/bin/ifconfig");
+symlink("toolbox", "/system/bin/sleep");
+symlink("toolbox", "/system/bin/printenv");
+symlink("toolbox", "/system/bin/smd");
+symlink("toolbox", "/system/bin/sendevent");
+symlink("toolbox", "/system/bin/ionice");
+symlink("toolbox", "/system/bin/vmstat");
+symlink("toolbox", "/system/bin/stop");
+symlink("toolbox", "/system/bin/ioctl");
+symlink("toolbox", "/system/bin/iftop");
+symlink("toolbox", "/system/bin/rmmod");
+symlink("toolbox", "/system/bin/ls");
+symlink("toolbox", "/system/bin/setprop");
+symlink("toolbox", "/system/bin/top");
+symlink("toolbox", "/system/bin/mount");
+symlink("toolbox", "/system/bin/notify");
+symlink("toolbox", "/system/bin/reboot");
+symlink("toolbox", "/system/bin/cat");
+symlink("toolbox", "/system/bin/start");
+symlink("toolbox", "/system/bin/cmp");
+symlink("toolbox", "/system/bin/lsmod");
+symlink("toolbox", "/system/bin/getprop");
+symlink("toolbox", "/system/bin/wipe");
+symlink("toolbox", "/system/bin/touch");
+symlink("toolbox", "/system/bin/renice");
+symlink("toolbox", "/system/bin/kill");
+symlink("toolbox", "/system/bin/getevent");
+symlink("toolbox", "/system/bin/rm");
+symlink("toolbox", "/system/bin/nandread");
+symlink("toolbox", "/system/bin/setconsole");
+symlink("toolbox", "/system/bin/dd");
+symlink("toolbox", "/system/bin/sync");
+symlink("toolbox", "/system/bin/ps");
+symlink("toolbox", "/system/bin/id");
+symlink("mksh", "/system/bin/sh");
+symlink("toolbox", "/system/bin/md5");
+symlink("toolbox", "/system/bin/lsof");
+symlink("toolbox", "/system/bin/mkdir");
+symlink("toolbox", "/system/bin/mv");
+symlink("toolbox", "/system/bin/watchprops");
+symlink("toolbox", "/system/bin/chmod");
+symlink("toolbox", "/system/bin/uptime");
+symlink("toolbox", "/system/bin/newfs_msdos");
+symlink("toolbox", "/system/bin/chown");
+symlink("toolbox", "/system/bin/ln");
+symlink("toolbox", "/system/bin/date");
+symlink("Roboto-Regular.ttf", "/system/fonts/DroidSans.ttf");
+symlink("Roboto-Bold.ttf", "/system/fonts/DroidSans-Bold.ttf");
+ui_print("Setting Permissions");
+set_perm_recursive(0, 0, 0755, 0644, "/system");
+set_perm_recursive(0, 0, 0755, 0755, "/system/etc/init.d");
+set_perm_recursive(0, 2000, 0755, 0755, "/system/bin");
+set_perm(0, 3003, 06755, "/system/bin/ip");
+set_perm(0, 3003, 02750, "/system/bin/netcfg");
+set_perm(0, 3004, 02755, "/system/bin/ping");
+set_perm(0, 2000, 06750, "/system/bin/run-as");
+set_perm_recursive(1002, 1002, 0755, 0440, "/system/etc/bluetooth");
+set_perm(0, 0, 0755, "/system/etc/bluetooth");
+set_perm(1000, 1000, 0640, "/system/etc/bluetooth/auto_pairing.conf");
+set_perm(3002, 3002, 0444, "/system/etc/bluetooth/blacklist.conf");
+set_perm(1002, 1002, 0440, "/system/etc/dbus.conf");
+set_perm(1014, 2000, 0550, "/system/etc/dhcpcd/dhcpcd-run-hooks");
+set_perm(0, 2000, 0550, "/system/etc/init.goldfish.sh");
+set_perm_recursive(0, 0, 0755, 0555, "/system/etc/ppp");
+set_perm_recursive(0, 2000, 0755, 0644, "/system/vendor");
+set_perm_recursive(0, 0, 0755, 0644, "/system/vendor/firmware");
+set_perm(0, 2000, 0755, "/system/vendor/firmware");
+set_perm_recursive(0, 2000, 0755, 0755, "/system/xbin");
+set_perm(0, 0, 04755, "/system/xbin/bash");
+symlink("/system/xbin/bash", "/system/bin/sh");
+set_perm(0, 0, 04755, "/system/xbin/nano");
+set_perm(0, 0, 04755, "/system/xbin/sysrw");
+set_perm(0, 0, 04755, "/system/xbin/sysro");
+set_perm(0, 0, 06755, "/system/xbin/su");
+set_perm(0, 0, 06755, "/system/bin/su");
+symlink("/system/xbin/su", "/system/bin/su");
+package_extract_dir("extra/system", "/system");
+
+ui_print("Flashing kernel");
+
+assert(package_extract_file("boot.img", "/tmp/boot.img"),
+       write_raw_image("/tmp/boot.img", "/dev/block/mmcblk0p7"),
+       delete("/tmp/boot.img"));
+
+ui_print("");
+run_program("/sbin/busybox", "cp", "/tmp/recovery.log", "/sdcard/Infamous_recovery.log");
+ui_print("Finishing");
+unmount("/system");
+show_progress(0.000000, 0);
+ui_print(" ");
+ui_print(" ");
+ui_print("Done. Enjoy! ~ Jamison904");
+[/code][/hide]
+[/INDENT][/INDENT]
+
+
+
+[/hide]

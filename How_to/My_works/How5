@@ -1,0 +1,170 @@
+[quote][b][color=red]How to compile AOKP for d2tmo (T-mobile S3)[/color][/b][/quote]
+
+
+
+[hide]
+
+[INDENT][b]This is a quick walk through to get you started compiling AOKP MR1 4.2.2 from source. I have made it super easy for you and anyone who can read will be able to do it. Again this is for Linux ( 64 bit is a must!!!!.) You will also need at least 50 gigs of free space. ( I would go as far as saying 100 gig but you can get by with 50.)
+
+[INDENT]First you need to download my repo tool [URL="http://goo.im/devs/Jamison904/T999/Infamous_S3/Tools/JamisonRepo.zip"]Download link[/URL]
+
+Once you have it download extract to your working folder. Then right click and open terminal here. Then:
+[code]
+chmod +x Repo_Sync.sh
+[/code]
+
+This will make the script executable. 
+
+[/INDENT]
+
+
+[INDENT]
+
+Now in the terminal you will do:
+
+[code]
+. Repo_Sync.sh
+[/code]
+
+This will pull up the main menu. 
+
+##########################################################
+#                 Jamison904 Tools                       #
+#========================================================#
+#               1 - Install Java-6                       #
+#               2 - Install Required Packages            #
+#               3 - Sync AoCP Jellybean                  #
+#               4 - Sync CM9                             #
+#               5 - Sync AOSP Jellybean                  #
+#               6 - Sync LiquidSmooth JB                 #
+#               7 - sync CNA Jellybean                   #
+#               8 - Sync CM10                            #
+#               9 - Sync AOKP                            #
+#              10 - Sync AOKP Jellybean                  #
+#              11 - Sync Baked AOSP                      #
+#              12 - Slim 4.2                             #
+##########################################################
+#                      x - Exit                          #
+##########################################################
+
+Enter option: 
+
+[/INDENT]
+
+
+[INDENT]
+
+[COLOR="Red"]DO NOT DO OPTION 1. This is older and will undo the version on Java you installed from above and is no longer the supported version of Java.[/COLOR]
+
+Now pick option # 2. This will install the required packages you will need to build.
+
+[/INDENT]
+
+[INDENT]
+
+Now pick number 10 - Sync AOKP Jellybean. This will make a folder called AOKP and will initiate the repo and download the source ( you can move this folder later.)  Follow the on screen prompts and input your name ( Real name ) and a real email address. At this point go have a beer and wash the wife's car. This will take a while depending on your internet speed. 
+
+[/INDENT]
+
+
+
+[INDENT]
+
+Now you will need to add the local manifest so it knows where to get the source for the kernel. Do a "Ctrl and h" to show hidden folders. Now open the . repo folder. Then do a right click and add new document. Rename the new document to local_manifest.xml then copy and paste the code below and then save it.
+
+
+[code]
+
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+<remote name="github"
+fetch="https://github.com/" />
+<!-- Kernels -->
+<project path="kernel/samsung/d2" name="AOKP/kernel_samsung_d2" remote="aokp" revision="jb-mr1" />
+</manifest>
+
+
+[/code]
+[/INDENT][/INDENT]
+
+
+
+
+[INDENT]
+Now that you have the local manifest in the . repo folder you will need to download the kernel source.
+Do:
+[code]
+repo sync
+[/code]
+
+
+[INDENT]
+Almost there.... once it finishes it is time to try your first build.
+
+To start the build type in this command:
+
+[code]
+. build/envsetup.sh && brunch d2tmo -j5
+[/code]
+
+The[COLOR="Red"] . build/envsetup.sh[/COLOR] part sets up the environment to build. The [COLOR="red"]&&[/COLOR] part tells the terminal to also do this. The [COLOR="red"]brunch d2tmo[/COLOR] tells it to build for the T-mobile S3. Last the [COLOR="red"]-j5[/COLOR] tells it how many jobs to do at once. The higher the number the more jobs it will do. Be careful though because you can do too many jobs for your computer and will bog out and will even cause a build to fail if you run out of memory. Rule of thumb here is one for each core you have then add one. I have a quad core so I do -j5. If you have a dual core do -j3 and if you are not sure you can leave it off completely.  (.build/envsetup.sh && brunch d2tmo)
+
+[/INDENT]
+
+
+[INDENT]
+This is where is gets fun. The first build will take a few hours. If you get any errors copy as much of the termial as you can and make a pastebin ([url]www.pastebin.com[/url]) and link it here for us to help you with. [COLOR="Red"]PLEASE DO NOT PASTE THE WHOLE THING HERE!!![/COLOR] Thanks.  
+[/INDENT]
+
+
+[INDENT]
+
+Now if you get a screen with AOKP in a few colors then you have a successful build. Time to backup your phone and test out your work. The Finished zip will be in the out folder. AOKP/out/target/product/d2tmo to be exact. You will want to grab the aokp_d2tmo_unofficial_Mar-25-13.zip this is the one you should flash.
+
+[/INDENT]
+
+
+[INDENT]
+
+Almost done. Once you have a successful build you will want to install and activate ccache. This will cut your build time in half or more!!!
+
+First you need to install it.
+[code]
+sudo apt-get install ccache
+[/code]
+
+Put the following in your .bashrc by doing:
+[code]
+gedit ~/.bashrc
+[/code]
+
+now add 
+[code]
+export USE_CCACHE=1
+[/code]
+save then close.
+
+Now to set it you will need to
+[code]
+ccache -M 50
+[/code]
+
+The 50 stands for 50gigs!!! The recommended size is 50-100GB but the size you use is up to you. 
+
+
+[/INDENT]
+
+Cherry pick how to coming. . .  .
+
+[/INDENT][/b][/hide]
+
+
+
+
+
+[quote][b][color=red]How to cherry pick[/color][/b][/quote]
+
+[hide]
+[INDENT]
+[B]Check out the awesome how to by my bro [COLOR="Red"]Midnight_Rider[/COLOR] [URL="http://forum.xda-developers.com/showpost.php?p=41332948&postcount=116"]Link to his write-up. Check it out and be sure to thank him!!!![/URL][/B]
+[/indent][/hide]
