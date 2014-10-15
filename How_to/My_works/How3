@@ -1,6 +1,6 @@
 [quote][b][color=red]Android Kitchen how to for Linux: [/color][/b][/quote]
 
-[hide]
+
 [code] This is a rough draft and I will clean it up and make it look pretty later... :cool: [/code]
 
 OK guys this is a step by step "How to"
@@ -332,7 +332,7 @@ Enter option:
 
 [quote] Now at this point after making your tweaks and changes, you will select option # 99. After that I am normally running after my daughter so I pick option # 2 which automates the zipping, signing, and naming process[/quote]
 
-[INDENT][INDENT]
+[quote][quote]
 
 [COLOR="Red"][B]Now very import before you flash!! Make sure you compare the blocks from my installer script and the one you have from the kitchen. Make sure that yours has this information and nothing else or you will end up with a soft brick or even a hard brick with no return!![/B][/COLOR]
 
@@ -343,7 +343,7 @@ Enter option:
 /dev/block/mmcblk0p7 - for the boot.img (kernel)
 [/code]
 
-[Hide][code]
+[code]
 ui_print(" ");
 ui_print(" ");
 ui_print(" ");
@@ -491,9 +491,9 @@ show_progress(0.000000, 0);
 ui_print(" ");
 ui_print(" ");
 ui_print("Done. Enjoy! ~ Jamison904");
-[/code][/hide]
-[/INDENT][/INDENT]
+[/code]
+[/quote][/quote]
 
 
 
-[/hide]
+

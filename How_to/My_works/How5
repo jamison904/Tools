@@ -2,11 +2,11 @@
 
 
 
-[hide]
 
-[INDENT][b]This is a quick walk through to get you started compiling AOKP MR1 4.2.2 from source. I have made it super easy for you and anyone who can read will be able to do it. Again this is for Linux ( 64 bit is a must!!!!.) You will also need at least 50 gigs of free space. ( I would go as far as saying 100 gig but you can get by with 50.)
 
-[INDENT]First you need to download my repo tool [URL="http://goo.im/devs/Jamison904/T999/Infamous_S3/Tools/JamisonRepo.zip"]Download link[/URL]
+[quote][b]This is a quick walk through to get you started compiling AOKP MR1 4.2.2 from source. I have made it super easy for you and anyone who can read will be able to do it. Again this is for Linux ( 64 bit is a must!!!!.) You will also need at least 50 gigs of free space. ( I would go as far as saying 100 gig but you can get by with 50.)
+
+[quote]First you need to download my repo tool [URL="http://goo.im/devs/Jamison904/T999/Infamous_S3/Tools/JamisonRepo.zip"]Download link[/URL]
 
 Once you have it download extract to your working folder. Then right click and open terminal here. Then:
 [code]
@@ -15,10 +15,10 @@ chmod +x Repo_Sync.sh
 
 This will make the script executable. 
 
-[/INDENT]
+[/quote]
 
 
-[INDENT]
+[quote]
 
 Now in the terminal you will do:
 
@@ -49,26 +49,26 @@ This will pull up the main menu.
 
 Enter option: 
 
-[/INDENT]
+[/quote]
 
 
-[INDENT]
+[quote]
 
 [COLOR="Red"]DO NOT DO OPTION 1. This is older and will undo the version on Java you installed from above and is no longer the supported version of Java.[/COLOR]
 
 Now pick option # 2. This will install the required packages you will need to build.
 
-[/INDENT]
+[/quote]
 
-[INDENT]
+[quote]
 
 Now pick number 10 - Sync AOKP Jellybean. This will make a folder called AOKP and will initiate the repo and download the source ( you can move this folder later.)  Follow the on screen prompts and input your name ( Real name ) and a real email address. At this point go have a beer and wash the wife's car. This will take a while depending on your internet speed. 
 
-[/INDENT]
+[/quote]
 
 
 
-[INDENT]
+[quote]
 
 Now you will need to add the local manifest so it knows where to get the source for the kernel. Do a "Ctrl and h" to show hidden folders. Now open the . repo folder. Then do a right click and add new document. Rename the new document to local_manifest.xml then copy and paste the code below and then save it.
 
@@ -85,12 +85,12 @@ fetch="https://github.com/" />
 
 
 [/code]
-[/INDENT][/INDENT]
+[/quote][/quote]
 
 
 
 
-[INDENT]
+[quote]
 Now that you have the local manifest in the . repo folder you will need to download the kernel source.
 Do:
 [code]
@@ -98,7 +98,7 @@ repo sync
 [/code]
 
 
-[INDENT]
+[quote]
 Almost there.... once it finishes it is time to try your first build.
 
 To start the build type in this command:
@@ -109,22 +109,22 @@ To start the build type in this command:
 
 The[COLOR="Red"] . build/envsetup.sh[/COLOR] part sets up the environment to build. The [COLOR="red"]&&[/COLOR] part tells the terminal to also do this. The [COLOR="red"]brunch d2tmo[/COLOR] tells it to build for the T-mobile S3. Last the [COLOR="red"]-j5[/COLOR] tells it how many jobs to do at once. The higher the number the more jobs it will do. Be careful though because you can do too many jobs for your computer and will bog out and will even cause a build to fail if you run out of memory. Rule of thumb here is one for each core you have then add one. I have a quad core so I do -j5. If you have a dual core do -j3 and if you are not sure you can leave it off completely.  (.build/envsetup.sh && brunch d2tmo)
 
-[/INDENT]
+[/quote]
 
 
-[INDENT]
+[quote]
 This is where is gets fun. The first build will take a few hours. If you get any errors copy as much of the termial as you can and make a pastebin ([url]www.pastebin.com[/url]) and link it here for us to help you with. [COLOR="Red"]PLEASE DO NOT PASTE THE WHOLE THING HERE!!![/COLOR] Thanks.  
-[/INDENT]
+[/quote]
 
 
-[INDENT]
+[quote]
 
 Now if you get a screen with AOKP in a few colors then you have a successful build. Time to backup your phone and test out your work. The Finished zip will be in the out folder. AOKP/out/target/product/d2tmo to be exact. You will want to grab the aokp_d2tmo_unofficial_Mar-25-13.zip this is the one you should flash.
 
-[/INDENT]
+[/quote]
 
 
-[INDENT]
+[quote]
 
 Almost done. Once you have a successful build you will want to install and activate ccache. This will cut your build time in half or more!!!
 
@@ -152,11 +152,11 @@ ccache -M 50
 The 50 stands for 50gigs!!! The recommended size is 50-100GB but the size you use is up to you. 
 
 
-[/INDENT]
+[/quote]
 
 Cherry pick how to coming. . .  .
 
-[/INDENT][/b][/hide]
+[/quote][/b]
 
 
 
@@ -164,7 +164,7 @@ Cherry pick how to coming. . .  .
 
 [quote][b][color=red]How to cherry pick[/color][/b][/quote]
 
-[hide]
-[INDENT]
+
+[quote]
 [B]Check out the awesome how to by my bro [COLOR="Red"]Midnight_Rider[/COLOR] [URL="http://forum.xda-developers.com/showpost.php?p=41332948&postcount=116"]Link to his write-up. Check it out and be sure to thank him!!!![/URL][/B]
-[/indent][/hide]
+[/quote]

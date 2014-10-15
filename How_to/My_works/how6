@@ -1,8 +1,8 @@
 [quote][b][color=red]How to compile a kernel for d2tmo (T-mobile S3)[/color][/b][/quote]
 
 
-[hide]
-[indent][indent][b]
+
+[quote][quote][b]
 First off let me start with saying this, half assing a kernel or not following all the steps exactly [B]will brick your device![/B]. You have been warned. I personally was every hesitant to even try to make my own kernels because of the brick factor. After researching for weeks and [B]reading like crazy[/B] I felt like I had enough knowledge to attempt to build my own kernel. After talking with my buddy [B]TDJ[/B] he told me that when it comes to kernels you just have to get learn by hands on. Of course he was right. So be careful and if something doesn't seem right,do not flash it. Also the kernel_test.zip attached is for TMO/ATT S3. I haven't checked to see if the boot block is the same for all of the US S3's. I'll check and update this. Until then only use for TMO/ATT S3.
 
 [code]
@@ -21,30 +21,30 @@ First off let me start with saying this, half assing a kernel or not following a
 [/code]
 
 Now with that out of the way lets have some fun!  This how to is for the T999 TW kernel. This guide will work for all S3 devices with minimal changes. Also the basics here will work for all devices. Also at this point the guide is only build a stock kernel without changes. That will come in another update. I will need to show you git and how to use it before you can make changes. Also if you make and changes and you share the kernel with others you [COLOR="Red"]have to post your source!![/COLOR] So you will need to know how to use github or bithub. These too will come later.
-[/indent]
+[/quote]
 
-[indent]
+[quote]
 First you will need to download the source for the kernel. You will need to go to [url]http://opensource.samsung.com/[/url] and find the source for your device. Search for t999 and grab the one named SGH-T999_JB_TMB_Opensource.zip. Or you can grab it from my Goo account [URL="http://goo.im/devs/Jamison904/Stock_firmwares/SGH-T999_JB_TMB_Opensource.zip"]here. . . . .[/URL]
-[/indent]
+[/quote]
 
-[indent]
+[quote]
 Now you need to extract the zip. Then extract Kernel.tar.gz. Now make a folder in your home directory if you have not already called android. Then inside android make another director called kernel. Last make a folder for you kernel, you can name it whatever. For this how to lets just call it T999_TW_kernel. Now move everything from the extracted Kernel.tar.gz to this folder. This is your kernel working folder. 
-[/indent]
+[/quote]
 
-[indent]
+[quote]
 Next you will need to choose the toolchain you plan on using. There are many great ones out there. Just Google "kernel tool chain" to see the many different ones. The Android NDK comes with a bunch and most are 100% stable. Since I also suport AOKP for many devices, I just use the one they use. I have uploaded it to my github for you guys to download and use. Go to [url]https://github.com/jamison904/arm-eabi-4.6[/url] and click on zip to download it. 
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/toolchain_download_zps0a5b5d34.png[/IMG][/center]
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Now you will need to set your path and set the cross compile in your make file inside your kernel working folder.
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/toolchain_path_zps02b13b60.png[/IMG][/center]
-[/indent]
+[/quote]
 
-[indent]
+[quote]
 We are going to setup your toolchain path now. Extract the downloaded toolchain from my github and make a folder inside the android folder called toolchain. Now move the extracted tool chain here. Open up the make file in the kernel folder and set your path like below. (of course change Jamison904 to whatever yours is named.) save and close.
 
 [code]
@@ -55,18 +55,18 @@ CROSS_COMPILE  = /home/jamison904/android/toolchain/arm-eabi-4.6/bin/arm-eabi-
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/your_kernel_path_zpsba07a510.png[/IMG][/center]
 
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Name your kernel! Open the make folder and make the change then save and close.
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/name_kernel_zps5610da70.png[/IMG][/center]
-[/indent]
+[/quote]
 
 
 
-[indent]
+[quote]
 Now open terminal here inside the kernel build folder. You need set it up. You need to:
 
 [code]
@@ -74,11 +74,11 @@ make clean && make mrproper
 
 [/code]
 
-[/indent]
+[/quote]
 
 
 
-[indent]
+[quote]
 Ok time to pull the defconfig from your phone ([COLOR="Red"]This is for a TW Kernel so you need to be running a TW ROM. You also will need to be running a stock kernel for this to work right...[/COLOR]) You will need to connect your phone to your computer with adb debugging turned on. Then open the terminal from your desktop and:
 
 [code]
@@ -93,10 +93,10 @@ gunzip config.gz
 
 This will give you a file called config. You will want to rename this file to t999_defconfig. After that you will need to move this file to /home/jamison904 (your user name)/android/kernel/T999_TW_kernel/arch/arm/configs. Drop it here. 
 
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Now it is time to attempt to build. You will need to do:
 
 [code]
@@ -128,10 +128,10 @@ This shows you where to find the governors. You can change the default governor 
 [IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/xconfig5_zps1827e8ef.png[/IMG]
 
 [/center]
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Now lets see if you set it up correctly.... lol. You will do:
 
 [code]
@@ -142,17 +142,17 @@ make
 
 Later after you know that it will build you can seed it up by doing make -j5. This will make with 5 jobs at once. This is way faster but very hard to trouble shoot and find your errors. If it stops without finishing you will need to make clean && make mrproper then do the xconfig again and save and close then "make" .... This will only make with one job at a time thus you have an error and it will stop and you will be able to read the error. Copy and paste to pastebin.com and post the link here and I will help you figure it out. :cool:
 
-[/indent]
+[/quote]
 
 
 
-[indent]
+[quote]
 If you get this, congratulations you have made your first kernel... time to package it up and test.
 
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/Kernel_done_zpsb1783124.png[/IMG][/center]
 
-[/indent][/indent]
+[/quote][/quote]
 
 
 
@@ -160,7 +160,7 @@ If you get this, congratulations you have made your first kernel... time to pack
 
 
 
-[indent][indent]
+[quote][quote]
 Finding the zimage (kernel itself.) Navigate to arch/arm/boot and grab the zimage.
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/Find_zimage1_zps089773ec.png[/IMG]
@@ -174,10 +174,10 @@ Finding the zimage (kernel itself.) Navigate to arch/arm/boot and grab the zimag
 
 [IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/find_zimage4_zpse8d810bf.png[/IMG][/center]
 
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Now to find the modules. Do a ctrl f in the root of your kernel build folder and screach for .ko. Make sure to include the . before ko. Then copy and paste these into a folder to hold them for the zip.
 
 
@@ -186,16 +186,16 @@ Now to find the modules. Do a ctrl f in the root of your kernel build folder and
 
 [IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/find_modules2_zpsef12e054.png[/IMG][/center]
 
-[/indent]
+[/quote]
 
 
-[indent] 
+[quote] 
 Now you need to unpackage a boot.img and replace the zimage then repackage it up. The easiest way to do this is with the Android kitchen. Takes less then a minute. If you have been following my guides here you will already have it setup and have working knowledge of the kitchen. If not, stop here and go catch up, i'll wait....;) Ok moving on.
 
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 
 I made a folder called WORKING_Kernel to keep these away from real working folders just in case I forget. Don't need to update my S2 ROM with a S3 kernel. Anyways...
 
@@ -246,15 +246,15 @@ Your new kernel is in the boot.img
 
 
 [/center]
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Now to flash the kernel. I have made you guys an empty flashable zip attached below. This way no one breaks their device trying to flash their kernel. If you do brick you didn't read the directions as this zip is dummy proof so to speak. ;)
-[/indent]
+[/quote]
 
 
-[indent]
+[quote]
 Now double click on the kernel_test.zip and drag and drop your new boot.img into the archive.
 
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/zip1_zpsd7c7021c.png[/IMG]
@@ -272,17 +272,17 @@ Now navigate to system/lib/modules and press Ctrl A to select all of the modules
 [IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/zip6_zps4875672a.png[/IMG]
 
 
-[/center][/indent]
+[/center][/quote]
 
 
-[indent]
+[quote]
 Done. Copy and paste the zip to your SDcard and reboot into recovery and pry.... lol. You will be good if you followed the directions. Enjoy your own build stock TW kernel! [I]Again remember not to public share your kernel unless you have uploaded "your exact source" and can provide a public link to it. You have been warned![/I] Next updates will include how to work git, commits, and github as well as some more advanced kernel tweaks and code. Also how Cherry-pick :cool:
 [center][IMG]http://i1258.photobucket.com/albums/ii537/InfamousROM/How%20to/done_zpsacfb0b02.png[/IMG][/center]
 
 
-[/b][/indent][/indent]
+[/b][/quote][/quote]
 
-[B][indent] For more advanced kernel work you will need meld to work conflicts. Open terminal and:
+[B][quote] For more advanced kernel work you will need meld to work conflicts. Open terminal and:
 
 [code]
 
@@ -304,5 +304,5 @@ git mergetool
 
 For more info on how to use it go to [url]http://meldmerge.org/[/url] ... have fun!
 
-[/indent][/B]
-[/hide]
+[/quote][/B]
+

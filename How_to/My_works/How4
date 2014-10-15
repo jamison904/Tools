@@ -1,6 +1,6 @@
 [quote][b][color=red]Apktool how to for Linux: [/color][/b][/quote]
 
-[hide]
+
 [quote][url]http://forum.xda-developers.com/showthread.php?t=1755243[/url] First go here to [b]iBotPeaches[/b]'s Apktool thread.
 
 Sidenote: check out the change log here and apply where needed. [url]http://code.google.com/p/android-apktool/wiki/Changelog[/url][/quote]
@@ -138,7 +138,7 @@ Now if all goes well you will have a new modded apk. One more step and you're do
 
 
 
-[/quote][/hide]
+[/quote]
 
 
 
@@ -146,10 +146,10 @@ Now if all goes well you will have a new modded apk. One more step and you're do
 
 [quote][b][color=red]Manually decompile and recompile smali, jar's and even apks' how to for Linux: [/color][/b][/quote]
 
-[hide]
+
 [COLOR="Red"]First off, huge shout out and thanks to Jesusfreke!!! Without him none of this would be possible. [/COLOR]
 
-[INDENT][INDENT][b]
+[quote][quote][b]
 First head over to [URL="http://code.google.com/p/smali/downloads/list"]download section[/URL] and download 
 [code]
 baksmali-1.4.2.jar
@@ -162,10 +162,10 @@ baksmali.jar
 smali.jar
 [/code]
 
-Now make a new folder. I named mine smali. Place both into the new folder.[/INDENT][/INDENT]
+Now make a new folder. I named mine smali. Place both into the new folder.[/quote][/quote]
 
 
-[INDENT]
+[quote]
 Next go to Ubuntu software center and download 7zip.
 
 Lets use the android.policy.jar as an example for this part of the guide.
@@ -174,9 +174,9 @@ Take the android.policy.jar and place it into the new folder (smali)
 
 double click on the android.policy.jar to open the archive. Then click on the class.dex and drag it and drop into the folder (smali)
 
-[/INDENT]
+[/quote]
 
-[INDENT][INDENT]
+[quote][quote]
 Now for the fun part.
 
 Right click and open terminal here inside the folder. (If you haven't got it yet please do. Go to Ubuntu software center and download right click terminal.)
@@ -187,9 +187,9 @@ java -jar baksmali.jar -o classout/ classes.dex
 [/code]
 
 this will decompile the class.dex to a folder named class. Make your changes then continue. 
-[/INDENT]
+[/quote]
 
-[INDENT]
+[quote]
 
 Now to recompile you will type or copy and paste:
 [code]
@@ -200,11 +200,11 @@ This will give you the output of new-classes.dex. If you get any errors or don't
 
 
 You will want to copy the android.policy.jar and the new-classes.dex to a new folder inside the folder you have been working. I name this folder Test1. This way you don't overwrite the stock ones. Plus makes it easiser to keep track of what worked and what did not.
-[/INDENT][/INDENT]
+[/quote][/quote]
 
-[INDENT]
+[quote]
 Now all you need to to is double click on the android.policy.jar to open the archive again. Now since you are in the Test1 folder rename new-classes.dex to
 classes.dex. Last just drag classes.dex to the archive and drop it. It will add the new classes.dex to the archive. Once it is done close the archive and test to see if your chages worked. 
 
 I have attached a test zip for you to use. Just place the apk or jar where it goes. ie...SystemUI.apk goes into system/app and framework-res.apk goes into system/framework. Just double click the zip and go to the folder the apk or jar goes to and drag and drop it in then just close the archive. No signing needed this way. :cool:
-[/INDENT][/b][/hide]
+[/quote][/b]

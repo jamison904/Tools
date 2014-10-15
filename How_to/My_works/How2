@@ -1,51 +1,51 @@
 [quote][b][color=red]Setting up Linux and a developers environment how to for Linux: [/color][/b][/quote]
 
-[hide]
+
 Ok guys here is my setup that has successfully worked for me for over 2 years. You have to have a developer environment like this to move on to the "how to" build a basic ROM. Also again this guide is for Linux ( 64 bit is a must!!!) Here goes.
 
-[b][INDENT]
-[INDENT] First you need to figure out if you are going to use a virtual box [url]https://www.virtualbox.org/wiki/Downloads[/url] or dual boot [url]http://goo.gl/zK65u[/url] (which I storngly suggest.) [/INDENT]
+[b][quote]
+[quote] First you need to figure out if you are going to use a virtual box [url]https://www.virtualbox.org/wiki/Downloads[/url] or dual boot [url]http://goo.gl/zK65u[/url] (which I storngly suggest.) [/quote]
 
-[INDENT] Now you need to chose the distro [url]http://en.wikipedia.org/wiki/Linux_distribution[/url][/INDENT]
+[quote] Now you need to chose the distro [url]http://en.wikipedia.org/wiki/Linux_distribution[/url][/quote]
 
-[INDENT] Personally I run Ubuntu 12.04 LTS and strongly suggest you use it as well if you plan on doing extensive development. Head over to Ubuntu and download it there. [URL="http://www.ubuntu.com/download/desktop"]Download page[/URL] [/INDENT]
+[quote] Personally I run Ubuntu 12.04 LTS and strongly suggest you use it as well if you plan on doing extensive development. Head over to Ubuntu and download it there. [URL="http://www.ubuntu.com/download/desktop"]Download page[/URL] [/quote]
 
-[INDENT] Now after you have downloaded Ubuntu (64 bit!) you need to install Linux.[/INDENT]
+[quote] Now after you have downloaded Ubuntu (64 bit!) you need to install Linux.[/quote]
 
-[INDENT] Easiest way is to put in a blank DVD and click on the ISO(Ubuntu os) and burn the image on the DVD. You can also setup and burn it onto a thumb drive that is at least 4 gb. You will need to Google this if you want to go that way.[/INDENT]
+[quote] Easiest way is to put in a blank DVD and click on the ISO(Ubuntu os) and burn the image on the DVD. You can also setup and burn it onto a thumb drive that is at least 4 gb. You will need to Google this if you want to go that way.[/quote]
 
-[INDENT] once you have burnt the image you will need to install, reboot your computer and watch the screen (make sure the DVD or thumb drive is in.) Most computers will say either hit "ESC" or F9 or F12 to pull up boot options.[/INDENT]
+[quote] once you have burnt the image you will need to install, reboot your computer and watch the screen (make sure the DVD or thumb drive is in.) Most computers will say either hit "ESC" or F9 or F12 to pull up boot options.[/quote]
 
-[INDENT] Now select the option that say something about DVD/something,,,, this will bring up the options from within the boot disk. Select live boot. This will bring up Linux. Once it is up sign into your Wifi router because this is needed in the install.[/INDENT]
+[quote] Now select the option that say something about DVD/something,,,, this will bring up the options from within the boot disk. Select live boot. This will bring up Linux. Once it is up sign into your Wifi router because this is needed in the install.[/quote]
 
-[INDENT] Click on the Icon that says install Ubuntu. Install . . . and follow prompts. Very easy setup...[/INDENT]
+[quote] Click on the Icon that says install Ubuntu. Install . . . and follow prompts. Very easy setup...[/quote]
 
-[INDENT] Congratulations you now have Linux installed.  :cool: [/INDENT][/INDENT]
+[quote] Congratulations you now have Linux installed.  :cool: [/quote][/quote]
 
 
-[INDENT]
+[quote]
 
-[indent] Before anything you need to install right click terminal then reboot for it to effect. Do this now.
+[quote] Before anything you need to install right click terminal then reboot for it to effect. Do this now.
 
 [code]
 sudo apt-get install nautilus-open-terminal
-[/code][/indent]
+[/code][/quote]
 
-[indent] Now head over to my github and download the developer setup package I have made for you guys. This way everything is in one place. I will try and keep the tools up to date as well. Download - [url]https://github.com/jamison904/developer_setup[/url]
+[quote] Now head over to my github and download the developer setup package I have made for you guys. This way everything is in one place. I will try and keep the tools up to date as well. Download - [url]https://github.com/jamison904/developer_setup[/url]
 
-[/indent]
+[/quote]
 
 
-[INDENT]Once downloaded, extract. Then open the folder find andadb.sh. Right click it and go to permissions and mark this file executable. Now open termial and;
+[quote]Once downloaded, extract. Then open the folder find andadb.sh. Right click it and go to permissions and mark this file executable. Now open termial and;
 [code]
 . andadb.sh
 [/code]
- [/INDENT]
+ [/quote]
 
 
-[INDENT] Now you will have a few options. BE CAREFUL  :evil:  not to do them all. Some we still will need to do manually and will cause issues if you do them  :shock: here.[/INDENT]
+[quote] Now you will have a few options. BE CAREFUL  :evil:  not to do them all. Some we still will need to do manually and will cause issues if you do them  :shock: here.[/quote]
 
-[INDENT]
+[quote]
 **********************************************************
            Android ADB Installer 2.1                                              
                    Main Menu                                                            
@@ -64,13 +64,13 @@ sudo apt-get install nautilus-open-terminal
 
 Enter selection:
 
-[/INDENT]
+[/quote]
 
 
-[INDENT] once you are done with this step you are 90% done. You can now start playing with the Android Kitchen. I will make another thread to show you how to set up and use the apktool. [/INDENT]
+[quote] once you are done with this step you are 90% done. You can now start playing with the Android Kitchen. I will make another thread to show you how to set up and use the apktool. [/quote]
 
 
-[INDENT]
+[quote]
 [b]Update for java[/b]
 
 The script above will install an outdated version of java. No worries, here is the fix.
@@ -99,7 +99,7 @@ exit
 [/code]
 
 
-[indent]
+[quote]
 
 Add your Path for Android SDK  and Java
 
@@ -122,13 +122,13 @@ export PATH=$PATH:~/android/sdk/platform-tools
 export PATH=$PATH:~/android/sdk/tools[/CODE] 
 
 Then save and close.
-[/indent]
+[/quote]
 
-Congrats you're done. [/indent]
+Congrats you're done. [/quote]
 
-[indent]
+[quote]
 if you have any issues you may do this manually:
-[hide]
+
 [code]
 sudo apt-get install git gnupg flex bison gperf build-essential \
   zip curl libc6-dev libncurses5-dev:i386 x11proto-core-dev \
@@ -143,4 +143,4 @@ then
 sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
 [/code]
 
-[/hide][/b][/INDENT][/INDENT][/hide]
+[/b][/quote][/quote]
