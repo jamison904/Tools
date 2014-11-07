@@ -1,0 +1,70 @@
+.header {
+	font-size: 1.05em;
+}
+
+.inner-header {
+	margin: 0 auto;
+	max-width: 42.5em;
+	/*max-width: 15em;*/
+	padding: 1em 0.5em;
+}
+
+.header a {
+	font-size: 1.1em;
+}
+
+.content {
+	/* Move content closer to the header when we're on smaller screens. */
+	padding-top: .2em;
+}
+
+.content-container {
+	padding: 1em;
+}
+
+.header-link-group {
+	display: none;
+}
+
+.mobile-header-menu {
+	display: block;
+}
+
+.mobile-header-menu:hover {
+	cursor:pointer;
+}
+
+.mobile-header-menu a:hover {
+	border: none;
+}
+
+.menu-arrow {
+	font-size:0.6em;
+}
+
+.mobile-link-list {
+	display: none;
+	list-style-type: none;
+	text-align: center;
+	padding-left: 0;
+	margin: 0;
+}
+
+.mobile-link-list > li {
+	height: 48px;
+	line-height: 48px;
+}
+
+.mobile-link-list > li:hover {
+	background-color: lightgray;
+}
+
+.mobile-link {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.mobile-link:hover {
+	border:none;
+}

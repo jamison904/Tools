@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    
+    <!-- These sections below are for your "Themed Icons" section -->
+    <!-- These names should match YOUR actual icon names
+    	 the names used below are just for sampling purposes -->
+    
+    <!-- LATEST ICONS -->
+    <!-- All of your Latest icons listed here -->
+    <string-array name="latesticons">
+        <item>icon</item>
+    </string-array>
+    
+    <!-- SYSTEM ICONS -->
+    <!-- System icons listed here -->
+    <string-array name="systemicons">
+       <item>calculator</item>
+       <item>calendar</item>
+       <item>camera</item>
+       <item>chrome</item>
+       <item>clock</item>
+       <item>downloads</item>
+       <item>earth</item>
+       <item>email</item>
+       <item>gallery</item>
+       <item>gmail</item>
+       <item>google</item>
+       <item>google_settings</item>
+       <item>hangouts</item>
+       <item>launcher</item>
+       <item>maps</item>
+       <item>news_weather</item>
+       <item>people</item>
+       <item>phone</item>
+       <item>play_store</item>
+       <item>settings</item>
+       <item>voice_search</item>
+    </string-array>
+    
+    <!-- PLAY ICONS -->
+    <!-- Play Store icons listed here -->
+	<string-array name="playicons">
+       <item>play_books</item>
+       <item>play_games</item>
+       <item>play_movies</item>
+       <item>play_music</item>
+       <item>play_newsstand</item>
+       <item>play_store</item>
+    </string-array>
+    
+    <!-- GAMES ICONS -->
+    <!-- Game icons listed here -->
+    <string-array name="gamesicons">
+       <item>play_games</item>
+    </string-array>
+    
+    <!-- MISC ICONS -->
+    <!-- Misc icons listed here -->
+    <string-array name="miscicons">
+       <item>misc_icon</item>
+    </string-array>
+    
+    <!-- ALL ICONS -->
+    <!-- All of your icons listed here -->
+	<string-array name="icon_pack" translatable="true">
+       <item>google_settings</item>
+       <item>hangouts</item>
+	</string-array>
+</resources>

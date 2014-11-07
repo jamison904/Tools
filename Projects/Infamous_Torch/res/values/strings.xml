@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2014 Infamous Development
+-->
+<resources>
+
+    <string name="app_name">Torch</string>
+    <string name="pressme">Press Me!</string>
+    <string name="err_cannot_acquire">Cannot acquire camera resources!</string>
+    <string name="err_cannot_toggle">Cannot toggle camera LED!</string>
+    <string name="notify_toggle_on">Flashlight LED turned on</string>
+    <string name="notify_toggle_on_ext">Tap to turn off.</string>
+    <string name="menu_settings">Settings</string>
+    <string name="pref_autotoggle_title">Auto Toggle</string>
+    <string name="pref_autotoggle_summary">Toggle flashlight on at launch</string>
+    <string name="pref_dim_title">Dim Screen</string>
+    <string name="pref_dim_summary">Dim the screen when flashlight is turned on</string>
+    <string name="pref_userocker_title">Use Volume Rocker</string>
+    <string name="pref_userocker_summary">Use the volume rocker to toggle flashlight</string>
+    <string name="pref_strobe_title">Strobe</string>
+    <string name="pref_strobe_summary">Switch toggles flashlight in strobe mode</string>
+    <string name="pref_british_switch_title">Reverse switch</string>
+    <string name="pref_british_switch_summary">Reverse the button\'s sprite modality</string>
+
+    <string name="button_copy_address">Copy address</string>
+    <string name="toast_address_copied">Address copied to clipboard</string>
+    <string name="label_donate_address">Donate address</string>
+
+</resources>

@@ -1,0 +1,89 @@
+html {
+	/* Always show the scrollbar because when it appears it shifts
+	all the content to the left and looks bad. */
+	overflow-y: scroll;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+	background-color: #fbfbfb;
+	font-family: "Avenir Next", Nunito, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@font-face {
+	font-family: "Nunito";
+	src: url("fonts/nunito-light.ttf");
+}
+
+@font-face {
+	font-family: "Nunito";
+	src: url("fonts/nunito-regular.ttf");
+	font-weight: bold;
+}
+
+/* General utility rules */
+.float-left {
+	float: left;
+}
+
+.float-right {
+	float: right;
+}
+
+.clearfix:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+/* These are needed for IE6 and 7 but don't validate. */
+/* * html .clearfix             { zoom: 1; } /* IE6 */
+/* *:first-child+html .clearfix { zoom: 1; } /* IE7 */
+
+/* site specific */
+.header {
+	background-color: #f2f2f2;
+	border-bottom: 1px gray solid;
+	width: 100%;
+	font-size: 1.2em;
+	min-width: 19em;
+}
+
+.header a {
+	text-decoration: none;
+	color: #2f2f2f;
+}
+
+.header a:hover {
+	border-bottom: 2px #266a95 solid;
+}
+
+.header-tilde {
+	font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.inner-header {
+	margin: 0 auto;
+	max-width: 42.5em;
+	padding: 2em 1em;
+}
+
+.header-link {
+	margin-left: 1em;
+}
+
+a.selected-header-link {
+	color: #266a95;
+	border-bottom: 2px #266a95 solid;
+}
+
+.mobile-header-menu {
+	display:none;
+}
+
+.mobile-link-list {
+	display:none;
+}

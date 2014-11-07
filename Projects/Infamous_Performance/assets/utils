@@ -1,0 +1,139 @@
+##
+### PERFORMANCE CONTROL ###
+
+sysrw() {
+mount -o rw,remount /system
+}
+sysro() {
+mount -o ro,remount /system
+}
+get_prop(){
+local d="$1";
+local n="$2";
+if busybox [ "X$n"=="X" ]; then
+    busybox find $d -type f -prune -perm -600 -print0;
+else
+    busybox find $d -type f -prune -perm -600 -maxdepth $n -print0;
+fi;
+}
+set_prop() {
+	local prop_key=$(busybox echo "$1" | cut -d'=' -f1);
+	local prop_value=$(busybox echo "$1" | cut -d'=' -f2);
+	local prop_file=${2:-/system/build.prop}
+	local seperator="=";
+	if busybox [ -e $prop_file ];then
+	    sysrw
+		prop_line=`busybox grep -m 1 $prop_key $prop_file`;
+		if busybox [ -n "${prop_line}" ];then
+			if busybox [ -n "$( echo $prop_line | busybox grep ' = ' )" ];then
+				seperator=" = ";
+			fi
+			busybox sed -i "s|${prop_key}${seperator}.*|${prop_key}${seperator}${prop_value}|g" $prop_file;
+		else
+		    busybox echo "$prop_key$seperator$prop_value" >> $prop_file;
+		fi;
+		sysro;
+	fi;
+	return;
+}
+
+count_files(){
+local ext="$2";
+local r="";
+if busybox [ "X$2" == "X" ]; then
+    ext="*";
+fi;
+for d in $1; do
+    if busybox [ -d $d ]; then
+        i=$( busybox find $d -type f -name "$ext" | busybox wc -l );
+    else
+        i=0;
+    fi;
+    if busybox [ "X$r" == "X" ]; then
+        r="$i";
+    else
+        r="$r::$i";
+    fi;
+done;
+echo "$r";
+}
+
+get_cpu(){
+    local cpus=$1;
+    local ncpus=`busybox expr $cpus - 1`;
+    local r="";
+    local gov=`busybox cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`;
+    local io=`busybox awk -F'[][]' '{print $2}' /sys/block/mmcblk0/queue/scheduler`;
+    local oc="";
+    if busybox [ -f /sys/class/misc/liveoc/oc_value ]; then
+        oc=`busybox cat /sys/class/misc/liveoc/oc_value`;
+        busybox echo 100 > /sys/class/misc/liveoc/oc_value;
+    fi;
+    local allfreq="";
+    if busybox [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies ]; then
+        allfreq=`busybox cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies`;
+    elif busybox [ -f /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state ]; then
+        allfreq=`busybox cut -d' ' -f1 /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state | busybox sort -n | busybox xargs`;
+    else
+        allfreq="`cat sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq` `cat sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq`";
+    fi;
+    for c in `busybox seq 0 $ncpus`; do
+
+        if busybox [ -f "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_max_freq" ]; then
+            max=`busybox cat "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_max_freq" `;
+        fi;
+        if busybox [ -f /sys/module/cpu_tegra/parameters/cpu_user_cap ]; then
+            max=`busybox cat /sys/module/cpu_tegra/parameters/cpu_user_cap`;
+        fi;
+        if busybox [ -f /sys/power/cpufreq_max_limit ]; then
+            max=`busybox cat /sys/power/cpufreq_max_limit`;
+        fi;
+        if busybox [ -f /sys/kernel/cpufreq/hardlimit ]; then
+            max=`busybox cat /sys/kernel/cpufreq/hardlimit`;
+        fi;
+        if busybox [ "X$max" == "X" ]; then
+            max=0;
+        fi;
+
+        if busybox [ -f "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_min_freq" ]; then
+            min=`busybox cat "/sys/devices/system/cpu/cpu$c/cpufreq/scaling_min_freq" `;
+        fi;
+        if busybox [ -f /sys/power/cpufreq_min_limit ]; then
+            min=`busybox cat /sys/power/cpufreq_min_limit`;
+        fi;
+        if busybox [ "X$min" == "X" ]; then
+            min=0;
+        fi;
+
+        on=1;
+        if busybox [ -f "/sys/devices/system/cpu/cpu$c/online" ]; then
+            on=`busybox cat "/sys/devices/system/cpu/cpu$c/online" `;
+        fi;
+        if busybox [ "X$on" == "X" ]; then
+            on=0;
+        fi;
+
+        if busybox [ "X$r" == "X" ]; then
+            r="$min:$max:$gov:$io:$on";
+        else
+            r="$r:$min:$max:$gov:$io:$on";
+        fi;
+    done;
+if busybox [ -f /sys/class/misc/liveoc/oc_value ]; then
+    busybox echo $oc > /sys/class/misc/liveoc/oc_value;
+fi;
+echo "$r:$allfreq";
+}
+
+arg=$1;
+if busybox [ "$arg" == "-count" ]; then
+    count_files "$DIRS";
+elif busybox [ "$arg" == "-setprop" ]; then
+    set_prop "$2" $3;
+elif busybox [ "$arg" == "-getcpu" ]; then
+    get_cpu $2;
+elif busybox [ "$arg" == "-getprop" ]; then
+    get_prop "$2";
+fi;
+
+exit;

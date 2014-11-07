@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+** Copyright 2013, the1dynasty
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+-->
+
+<!-- Be sure to edit these strings according to how your requirements -->
+
+<resources>
+
+		<!-- This link will appear at the end of the theme description -->
+	<string name="app_link">https://play.google.com/store/apps/details?id=com.infamous.site</string>
+	
+	<string name="developer_link">https://play.google.com/store/apps/developer?id=Infamous+Productions</string>
+	<string name="developer_name">Jamison904</string>
+	<string name="dev_name">DEV NAME - Jamison904</string>
+	<string name="dev_bio_title">MORE ABOUT Jamison904</string>
+	<string name="dev_email">james.jamison85@gmail.com</string>
+	
+	<string name="theme_description_app">"Clean minimal dark theme."</string>
+	
+	<string name="theme_info">Thank YOU for your support!</string>
+	
+	<string name="dev_description">App, ROM, and Kernel developer</string>
+	
+	<string name="dev_bio">James Jamison is the departmental operations analyst at First Coast Service Options, Inc. A Medicare Administrative Contractor (MAC).
+		\n\n At night he is an Android developer. Projects range from custom firmwares, kernels, and applications that are currently on the Google PlayStore.</string>
+	
+	<string name="share_text">"Check out this awesome app. https://play.google.com/store/apps/details?id=com.infamous.site</string>
+	<string name="email_subject">Infamous Development app</string>
+	
+	<!-- dev Bill -->
+	<string name="developer_name2">mrimp</string>
+	<string name="dev_name2">DEV NAME - mrimp</string>
+	<string name="dev_bio_title2">MORE ABOUT mrimp</string>
+	<string name="dev_email2">mrimp@day-off.net</string>
+	<string name="dev_description2">App, ROM, and Kernel developer</string>
+
+	<string name="dev_bio2">I\'m an old fart that started hacking back in the early 80\'s. 
+		\n\n By day I\'m a General Superintendent for a General Contractor in Miami building multi-million dollar Hi-Rises. 
+		\n\n By night an android developer and a Harley enthusiast. Both the Wife and I have Harley\'s and ride almost every Sunday. 
+		\n\n Funny as I remember when the Internet was text base and only accessible from a University, crazy that it\'s changed so much! 
+		\n\n If it\'s hackable I\'ll hack it! Software, Hardware whatever I just LOVE it!</string>
+	
+	
+</resources>

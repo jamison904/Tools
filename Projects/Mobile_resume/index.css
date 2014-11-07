@@ -1,0 +1,69 @@
+a {
+	text-decoration: none;
+	color: #2f2f2f;
+}
+
+a:hover {
+	border-bottom: 2px #266a95 solid;
+	padding-bottom: 0;
+}
+
+.content {
+	width:100%;
+	padding-top: 4em;
+}
+
+.content-container {
+	margin: 0 auto;
+	max-width: 50em;
+	padding: 2em 1em;
+}
+
+.blurb {
+	font-size:1.2em;
+	padding-top: 15%;
+	width: 45%;
+}
+
+.image {
+	width: 45%;
+}
+
+.spacer {
+    width: 10%;
+    float: left;
+    display: block;
+}
+
+.social-icon {
+	display: inline-block;
+	height: 36px;
+	width: 36px;
+	background-size: 36px 36px;
+	background-position: center center;
+	background-repeat: no-repeat;
+	margin: 2px;
+	text-indent: -9999em;
+
+	background-color: gray;
+	margin-top: 1em;
+}
+
+.social-icon:hover {
+	border-width: 0;
+}
+
+.gmail { background-image: url(img/gmail.png); }
+.gmail:hover { background-color: #dd4b39; border-color: inherit;}
+
+.googleplus { background-image: url(img/googleplus.png); }
+.googleplus:hover { background-color: #00aced; }
+
+.linkedin { background-image: url(img/linkedin.png); }
+.linkedin:hover { background-color: #3b5998; }
+
+.github { background-image: url(img/github.png); }
+.github:hover { background-color: #4183c4; }
+
+.youtube { background-image: url(img/youtube.png); }
+.youtube:hover { background-color: #dd4b39; border-color: inherit;}
