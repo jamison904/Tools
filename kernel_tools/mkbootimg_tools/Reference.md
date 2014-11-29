@@ -22,3 +22,7 @@ Once done with the changes your going to need to repack the boot.img, to repack 
 In the mkbootimg_tools-master folder you will then see a new file called "newboot.img". (That is your newely created kernel boot.img with all your github changes, zImage, and ramdisk changes.)
 
 Now Rename newboot.img to boot.img, then add it to your kernel flashable.zip... Done! :)
+
+======
+
+./dtbTool -o ~/dt_files/dt.img -s 4096 -p ./scripts/dtc/ ./arch/arm/boot/dts/
