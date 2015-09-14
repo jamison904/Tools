@@ -1,0 +1,2223 @@
+#!/bin/bash
+# Initial trial script conversion of BongOfWars APK Kitchen
+# This is the first time i have tried to write a bash script
+# so please report any errors found and i will recify them 
+# ASAP, This was converted by
+# BongOfWar....
+
+## Misc Initial variables ##
+current=`pwd`
+set +e
+printf  '\033[8;50;150t'
+VERSION="1.5" # ( Developers Use Only ) 
+XDALINK="http://forum.xda-developers.com/showthread.php?t=3176652"
+CUSER="$(whoami)"
+## APK Kitchen Initial Variables ##
+export decompile="Sources_and_Resources_Files"
+export basefile=""
+export apktool="apktool_2.0.2_Bongs_Pull.jar"
+export heapy="1024"
+export usrc="9"
+export resusrc="0"
+export smalidis="2.0.6"
+apktools=$current/tools/tools/apktools/apktool_2.0.2_Bongs_Pull.jar
+java="java -version"
+zip7=$current/tools/tools/zip/7za
+framepath=$current/tools/framework/$apktool
+zipali=$current/tools/tools/zipalign/zipalign
+## Deodexer Initial Variables ##
+export rombase=""
+export armtest=""
+export rmnme=""
+logs=$current/tools/logs
+oat2dex=$current/tools/tools/oat2dex/oat2dex.jar
+
+
+BASE_MENU() {
+while :; do
+clear
+echo "---------------------------------------------------------------------------------------"
+echo "*                         BONGS Multi Purpose KITCHEN                                 *"
+echo "---------------------------------------------------------------------------------------"
+echo "*                            Written By BongOfWar                                     *"
+echo "---------------------------------------------------------------------------------------"
+echo "*  The Aim of this tool is to be an all in one solution to developers, Themers        *"
+echo "*  and Novices alike, below are several option for the different tools within         *"
+echo "*  the Kitchen please select the tool you need to continue..                          *"
+echo "*                                                                                     *"
+echo "*                                                                                     *"
+echo "---------------------------------------------------------------------------------------"
+echo "*  GUIDES..                                                                           *"
+echo "*--------------                                                                       *"
+echo "*                                                                                     *"
+echo "*  DG. To Open a Basic Guide For Deodexing                                            *"
+echo "*                                                                                     *"
+echo "---------------------------------------------------------------------------------------"
+echo "*  Main Tools..                                                                       *"
+echo "*---------------                                                                      *"
+echo "*                                                                                     *"
+echo "*  1. Go To APK Kitchen                                                               *"
+echo "*  2. Go To De-odexer                                                    00. Exit     *"
+echo "*  3. Go To Rom Tools                                                                 *"
+echo "---------------------------------------------------------------------------------------"
+echo -n "   Enter option: "
+  read opt
+    case $opt in
+		1) APK_START_MENU;;
+		2) DEODEX_START_MENU;;
+		00) EXIT_OUT;;
+		dg|DG|dG|Dg) BASIC_DEO_GUIDE;;
+		3) echo "Not Setup By Developer Yet" 
+			sleep 2s
+			;;
+		99) clear; EXIT_OUT;;
+		*)
+			echo "Unknown command: '$opt'"
+			sleep 1s
+			BASE_MENU
+		;;
+    esac
+done
+}
+
+
+#####################################################################################
+#
+#                                                    Bongs DEODEXER Below
+#####################################################################################
+
+
+
+DEODEX_ROM_BASE_FOLDER() {
+printf "%s" "Please input rom base folder name: "
+read rombase
+if [ ! -d "$rombase" ]; then
+	echo " Rom Folder with that name does not exsist in main Kitchen folder Please Retry !! "
+	sleep 3s
+	DEODEX_START_MENU
+else
+	andrver=""
+	api=""
+	export andrver=$(cat $current/$rombase/system/build.prop | grep "ro.build.version.release" | cut -d"=" -f2)
+	export api=$(cat $current/$rombase/system/build.prop | grep "ro.build.version.sdk" | cut -d"=" -f2)	
+	export rmnme=$(cat $current/$rombase/system/build.prop | grep "ro.build.display.id" | cut -d"=" -f2)
+	baseromfol=$current/$rombase
+	framfol=$current/$rombase/system/framework
+	appfol=$current/$rombase/system/app
+	pappfol=$current/$rombase/system/priv-app
+	ARCH_TEST
+fi
+}
+
+ARCH_TEST() {
+arch=""
+arch2=""
+cd $framfol
+export armarch=$(ls -d */ | sed 's/\///' | grep -m 1 arm$)
+export arm64arch=$(ls -d */ | sed 's/\///' | grep -m 1 arm64$)
+export x86arch=$(ls -d */ | sed 's/\///' | grep -m 1 x86$)
+export x86_64arch=$(ls -d */ | sed 's/\///' | grep -m 1 x86_64$)
+if [[ $arm64arch = "arm64" && -f $framfol/arm64/boot.oat ]]; then	
+	export arch="arm64"
+	export odexst="Odexed"
+	if [[ $armarch = "arm" && -f $framfol/arm/boot.oat ]]; then 
+		export arch2="arm"
+		export odexst="Odexed"
+	fi
+elif [[ $x86_64arch = "x86_64" && -f $framfol/x86_64/boot.oat ]]; then	
+	export arch="x86_64"
+	export odexst="Odexed"
+	if [[ $x86arch = "x86" && -f $framfol/x86/boot.oat ]]; then 
+		export arch2="x86"
+		export odexst="Odexed"
+	fi
+elif [[ $armarch = "arm" && -f $framfol/$armarch/boot.oat ]]; then
+	export arch="arm"
+	export odexst="Odexed"
+elif [[ $x86arch = "x86" && -f $framfol/$x86arch/boot.oat ]]; then
+	export arch="x86"
+	export odexst="Odexed"
+	else
+		export odexst="De-Odexed"
+		export arch="De-Odexed"
+		export arch2="De-Odexed"
+		
+	fi
+DEODEX_START_MENU
+}
+
+DEODEX_START_MENU() {
+while :; do
+clear
+echo "----------------------------------------------------------------------------------------------------------------------"
+echo " APK. To APK Kitchen                          BONGS LOLLIPOP DEODEXER                                   "
+echo "----------------------------------------------------------------------------------------------------------------------"
+echo "                                               Written By BongOfWar                                     "
+echo "----------------------------------------------------------------------------------------------------------------------"
+echo "  Welcome to BongOfWar's Lollipop Deodexer,                                                      Current Rom Info.    "
+echo "  part of Bongs Multi Kitchen, The aim of this tool is mainly for modders,               -----------------------------"
+echo "  themers and such to deodex lollipop roms with minimum hassle                           Rom Display id : $rmnme      "
+echo "                                                                                            Base Folder : $rombase    "
+echo "                                                                                                Rom API : $api        "
+echo "                                                                                            Android Ver : $andrver    "
+echo "  First step is to ensure you have moved your full                                        Main Arch Ver : $arch       "
+echo "  odexed rom folder to the base of the Kitchen Folder.                               Secondary Arch Ver : $arch2      "
+echo "  Now select option 1. to enter the name of your folder "
+echo "  into the enty field below. If this was done correctly                              Current Odex State : $odexst     "
+echo "  it should show the API and Android Version of current  "
+echo "  Rom in to Infomation to the right. "
+echo "----------------------------------------------------------------------------------------------------------------------"
+echo "  1. Enter Rom Base Folder Name.                                                      "
+echo "  2. De-odex Menu.                                                                 "
+echo "  3. Main Menu.     "
+echo "----------------------------------------------------------------------------------------------------------------------"
+echo -n "   Enter option: "
+  read opt
+    case $opt in
+		1) DEODEX_ROM_BASE_FOLDER;;
+		2) DEODEX_SEL_MENU;;
+		3) BASE_MENU;;
+		APK|apk|ApK|aPK|APk|Apk|apK) MAIN_MENU;;
+		99) clear; EXIT_OUT;;
+		*)
+			echo "Unknown command: '$opt'"
+			sleep 1s
+			DEODEX_START_MENU
+		;;
+    esac
+done
+}
+
+DEODEX_SEL_MENU() {
+clear
+while :; do
+echo "  ---------------------------------------------------------------------------"
+echo "                            DE-ODEX OPTIONS "
+echo "  ---------------------------------------------------------------------------"
+echo "  1. De-odex App Folder Only."
+echo "  2. De-odex Priv-App Folder Only."
+echo "  3. De-odex Framework Folder Only."
+echo "  4. Full System De-odex."
+echo "  "
+echo "  "
+echo "  "
+echo "  8. To MAIN MENU."
+echo  "  ---------------------------------------------------------------------------"
+printf "%s" "  Please make your decision: "
+read INPUT
+	if [ "$INPUT" = "1" ]; then
+		DO_APP_ONLY
+	elif [ "$INPUT" = "2" ]; then
+		DO_PAPP_ONLY
+	elif [ "$INPUT" = "3" ]; then
+		DO_FR_ONLY
+	elif [ "$INPUT" = "4" ]; then
+	        DO_FULL_SYS
+	elif [ "$INPUT" = "8" ]; then
+		DEODEX_START_MENU
+	else 
+	echo "Invalid Selection Try Again"
+	sleep 1s
+	DEODEX_SEL_MENU
+	fi
+done
+}
+BASIC_DEO_GUIDE() {
+clear
+cat $current/tools/guides/Deodexer_Guide.txt
+read -p " Press Enter When Ready To Continue "
+BASE_MENU
+}
+
+DO_APP_ONLY() {
+echo " Not In Use Only For Developer Test Purposes ( Please Use Option 4 ) "
+sleep 2s
+DEODEX_SEL_MENU
+}
+
+DO_PAPP_ONLY() {
+echo " Not In Use Only For Developer Test Purposes ( Please Use Option 4 ) "
+sleep 2s
+DEODEX_SEL_MENU
+}
+
+DO_FR_ONLY() {
+echo " Not In Use Only For Developer Test Purposes ( Please Use Option 4 ) "
+sleep 2s
+DEODEX_SEL_MENU
+}
+
+DO_FULL_SYS() {
+
+clear
+echo ""
+echo "**************************************"
+echo "       Deoptimizing boot.oat "
+echo "**************************************"
+echo ""
+
+if [[ ! -d "$framfol/$arch/odex" ]]; then
+	java -Xmx"$heapy"m -jar $oat2dex boot $framfol/$arch/boot.oat >> $logs/Deodex.log
+fi
+if [[ ! $arch2 = "" ]]; then
+	if [[ ! -d "$framfol/$arch2/odex" ]]; then
+		java -Xmx"$heapy"m -jar $oat2dex boot $framfol/$arch2/boot.oat >> $logs/Deodex.log
+	fi
+fi
+clear
+echo ""
+echo "**************************************"
+echo "     Start deodexing /system/app "
+echo "**************************************"
+echo ""
+
+if [[ -d $baseromfol/system/vendor/app ]]; then
+	cd $baseromfol/system/vendor/app
+	ls -d */ | sed 's/\///' > $logs/vendorapks.txt
+	mv "$baseromfol/system/vendor/app/"* $baseromfol/system/app
+fi
+
+app=""
+for app in $( ls $appfol ); do
+	if [[ -f "$appfol/$app/$arch/$app.odex.gz" ]]; then
+		cd $appfol/$app/$arch
+		echo "**************************************"
+		echo "      Extracting $app.odex.gz"
+		echo "**************************************"
+		$zip7 e "$appfol/$app/$arch/$app.odex.gz" >> $logs/Deodex.log
+	elif [[ -f "$appfol/$app/$arch/$app.odex.xz" ]]; then
+		cd $appfol/$app/$arch
+		echo "**************************************"
+		echo "      Extracting $app.odex.xz"
+		echo "**************************************"
+		$zip7 e "$appfol/$app/$arch/$app.odex.xz" >> $logs/Deodex.log
+	fi
+done
+if [[ ! $arch2 = "" ]]; then
+	app=""
+	for app in $( ls $appfol ); do
+		if [[ -f "$appfol/$app/$arch2/$app.odex.gz" ]]; then
+			cd $appfol/$app/$arch2
+			echo "**************************************"
+			echo "       Extracting $app.odex.gz"
+			echo "**************************************"
+			$zip7 e "$appfol/$app/$arch2/$app.odex.gz" >> $logs/Deodex.log
+		elif [[ -f "$appfol/$app/$arch2/$app.odex.xz" ]]; then
+			cd $appfol/$app/$arch2
+			echo "**************************************"
+			echo "       Extracting $app.odex.xz"
+			echo "**************************************"
+			$zip7 e "$appfol/$app/$arch2/$app.odex.xz" >> $logs/Deodex.log
+		fi
+	done 
+fi
+
+app=""
+for app in $( ls $appfol ); do
+	if [[ -d "$appfol/$app/$arch" ]]; then	
+		if [[ $($zip7 l $appfol/$app/$app.apk | grep classes.dex) = "" ]]; then
+			echo "**************************************"
+			echo "*                                    "
+			echo "*       Deodexing $app               "
+			echo "*                                    "
+			echo "**************************************"
+			java -Xmx"$heapy"m -jar $oat2dex $appfol/$app/$arch/$app.odex $framfol/$arch/odex >> $logs/Deodex.log
+			mv $appfol/$app/$arch/$app.dex $appfol/$app/$arch/classes.dex
+			if [[ -f "$appfol/$app/$arch/$app-classes2.dex" ]]; then
+				mv $appfol/$app/$arch/$app-classes2.dex $appfol/$app/$arch/classes2.dex
+			fi
+			if [[ -f "$appfol/$app/$arch/$app-classes3.dex" ]]; then
+				mv $appfol/$app/$arch/$app-classes3.dex $appfol/$app/$arch/classes3.dex
+			fi
+			$zip7 u -tzip $appfol/$app/$app.apk $appfol/$app/$arch/classes*.dex >> $logs/Deodex.log
+			rm -rf $appfol/$app/$arch
+			echo "**************************************"
+			echo "*                                    "
+			echo "*    $app Deodexed Successfully      "
+			echo "*                                    "
+			echo "**************************************"
+		else
+			echo ""
+			echo "$app is already deodexed ..."
+			echo ""
+			rm -rf $appfol/$app/$arch
+		fi
+	fi
+done
+
+if [[ ! $arch2 = "" ]]; then
+	app=""
+	for app in $( ls $appfol ); do
+		if [[ -d "$appfol/$app/$arch2" ]]; then
+			if [[ $($zip7 l $appfol/$app/$app.apk | grep classes.dex) = "" ]]; then			
+			echo "**************************************"
+			echo "*                                    "
+			echo "*       Deodexing $app               "
+			echo "*                                    "
+			echo "**************************************"
+				java -Xmx"$heapy"m -jar $oat2dex $appfol/$app/$arch2/$app.odex $framfol/$arch2/odex >> $logs/Deodex.log
+				mv $appfol/$app/$arch2/$app.dex $appfol/$app/$arch2/classes.dex
+				if [[ -f "$appfol/$app/$arch2/$app-classes2.dex" ]]; then
+					mv $appfol/$app/$arch2/$app-classes2.dex $appfol/$app/$arch2/classes2.dex
+				fi
+				if [[ -f "$appfol/$app/$arch2/$app-classes3.dex" ]]; then
+					mv $appfol/$app/$arch2/$app-classes3.dex $appfol/$app/$arch2/classes3.dex
+				fi
+				$zip7 u -tzip $appfol/$app/$app.apk $appfol/$app/$arch2/classes*.dex >> $logs/Deodex.log
+				rm -rf $appfol/$app/$arch2
+			echo "**************************************"
+			echo "*                                    "
+			echo "*    $app Deodexed Successfully      "
+			echo "*                                    "
+			echo "**************************************"
+			else
+				echo ""
+				echo "$app is already deodexed ..."
+				echo ""
+				rm -rf $appfol/$app/$arch2
+			fi
+		fi
+	done
+fi
+
+if [[ -f $logs/vendorapks.txt ]]; then
+	vendorapk=""
+	cat $logs/vendorapks.txt | while read vendorapk; do
+		mv $baseromfol/system/app/$vendorapk $baseromfol/system/vendor/app/$vendorapk
+	done
+	rm -rf $logs/vendorapks.txt
+fi
+
+clear
+
+echo ""
+echo "**************************************"
+echo "   Start deodexing /system/priv-app"
+echo "**************************************"
+echo ""
+
+privapp=""
+for privapp in $( ls $pappfol ); do
+	if [[ -f "$pappfol/$privapp/$arch/$privapp.odex.gz" ]]; then
+		cd $pappfol/$privapp/$arch
+		echo "**************************************"
+		echo "... Extracting $privapp.odex.gz"
+		echo "**************************************"
+		$zip7 e "$pappfol/$privapp/$arch/$privapp.odex.gz" >> $logs/Deodex.log
+	elif [[ -f "$pappfol/$privapp/$arch/$privapp.odex.xz" ]]; then
+		cd $pappfol/$privapp/$arch
+		echo "**************************************"
+		echo "... Extracting $privapp.odex.xz"
+		echo "**************************************"
+		$zip7 e "$pappfol/$privapp/$arch/$privapp.odex.xz" >> $logs/Deodex.log
+	fi
+done
+if [[ ! $arch2 = "" ]]; then
+	privapp=""
+	for privapp in $( ls $pappfol ); do
+		if [[ -f "$pappfol/$privapp/$arch2/$privapp.odex.gz" ]]; then
+			cd $pappfol/$privapp/$arch2
+			echo "**************************************"
+			echo "... Extracting $privapp.odex.gz"
+			echo "**************************************"
+			$zip7 e "$pappfol/$privapp/$arch2/$privapp.odex.gz" >> $logs/Deodex.log
+		elif [[ -f "$pappfol/$privapp/$arch2/$privapp.odex.xz" ]]; then
+			cd $pappfol/$privapp/$arch2
+			echo "**************************************"
+			echo "... Extracting $privapp.odex.xz"
+			echo "**************************************"
+			$zip7 e "$pappfol/$privapp/$arch2/$privapp.odex.xz" >> $logs/Deodex.log
+		fi
+	done
+fi
+
+privapp=""
+for privapp in $( ls $pappfol ); do
+	if [ -d "$pappfol/$privapp/$arch" ]; then
+		if [[ $($zip7 l $pappfol/$privapp/$privapp.apk | grep classes.dex) = "" ]]; then
+			echo "**************************************"
+			echo "*                                    "
+			echo "*       Deodexing $privapp           "
+			echo "*                                    "
+			echo "**************************************"
+			java -Xmx"$heapy"m -jar $oat2dex $pappfol/$privapp/$arch/$privapp.odex $framfol/$arch/odex >> $logs/Deodex.log
+			mv $pappfol/$privapp/$arch/$privapp.dex $pappfol/$privapp/$arch/classes.dex
+			if [[ -f "$pappfol/$privapp/$arch/$privapp-classes2.dex" ]]; then
+				mv $pappfol/$privapp/$arch/$privapp-classes2.dex $pappfol/$privapp/$arch/classes2.dex
+			fi
+			if [[ -f "$pappfol/$privapp/$arch/$privapp-classes3.dex" ]]; then
+				mv $pappfol/$privapp/$arch/$privapp-classes3.dex $pappfol/$privapp/$arch/classes3.dex
+			fi
+			$zip7 u -tzip $pappfol/$privapp/$privapp.apk $pappfol/$privapp/$arch/classes*.dex >> $logs/Deodex.log
+			rm -rf $pappfol/$privapp/$arch
+			echo "**************************************"
+			echo "*                                    "
+			echo "*    $privapp Deodexed Successfully  "
+			echo "*                                    "
+			echo "**************************************"
+		else
+			echo "**************************************"
+			echo "   $privapp is already deodexed"
+			echo "**************************************"
+			rm -rf $pappfol/$privapp/$arch
+		fi
+	fi
+done
+if [[ ! $arch2 = "" ]]; then
+	privapp=""
+	for privapp in $( ls $pappfol ); do
+		if [[ -d "$pappfol/$privapp/$arch2" ]]; then
+			if [[ $($zip7 l $pappfol/$privapp/$privapp.apk | grep classes.dex) = "" ]]; then
+			echo "**************************************"
+			echo "*                                    "
+			echo "*       Deodexing $privapp           "
+			echo "*                                    "
+			echo "**************************************"
+				java -Xmx"$heapy"m -jar $oat2dex $pappfol/$privapp/$arch2/$privapp.odex $framfol/$arch2/odex >> $logs/Deodex.log
+				mv $pappfol/$privapp/$arch2/$privapp.dex $pappfol/$privapp/$arch2/classes.dex
+				if [[ -f "$pappfol/$privapp/$arch2/$privapp-classes2.dex" ]]; then
+					mv $pappfol/$privapp/$arch2/$privapp-classes2.dex $pappfol/$privapp/$arch2/classes2.dex	
+				fi
+				if [[ -f "$pappfol/$privapp/$arch2/$privapp-classes3.dex" ]]; then
+					mv $pappfol/$privapp/$arch2/$privapp-classes3.dex $pappfol/$privapp/$arch2/classes3.dex
+				fi
+				$zip7 u -tzip $pappfol/$privapp/$privapp.apk $pappfol/$privapp/$arch2/classes*.dex >> $logs/Deodex.log
+				rm -rf $pappfol/$privapp/$arch2
+				echo "**************************************"
+			        echo "*                                    "
+				echo "*    $privapp Deodexed Successfully  "
+				echo "*                                    "
+				echo "**************************************"
+			else
+				echo "**************************************"
+				echo "    $privapp is already deodexed"
+				echo "**************************************"
+				rm -rf $appfol/$privapp/$arch2
+			fi
+		fi
+	done
+fi
+clear
+echo ""
+echo "**************************************"
+echo "   Start deodexing /system/framework "
+echo "**************************************"
+echo ""
+
+cd $framfol/$arch
+if [[ ! $(ls $framfol/$arch | grep .gz | rev | cut -c 9- | rev) = "" ]]; then
+	frame=""
+	for frame in $(ls | grep .gz | rev | cut -c 9- | rev); do
+		echo "**************************************"
+		echo "    Extracting $frame.odex.gz"
+		echo "**************************************"
+		$zip7 e "$frame.odex.gz" >> $logs/Deodex.log
+		rm -rf "$frame.odex.gz"
+	done
+elif [[ ! $(ls | grep .xz | rev | cut -c 9- | rev) = "" ]]; then
+	frame=""
+	for frame in $(ls | grep .xz | rev | cut -c 9- | rev); do
+		echo "**************************************"
+		echo "     Extracting $frame.odex.xz"
+		echo "**************************************"
+		$zip7 e $frame.odex.xz >> $logs/Deodex.log
+		rm -rf $frame.odex.xz
+	done
+fi
+
+frame=""
+for frame in $( ls $framfol/$arch | grep .odex | rev | cut -c 6- | rev ); do
+	if [[ $($zip7 l $framfol/$frame.jar | grep classes.dex) = "" ]]; then
+			echo "**************************************"
+			echo "*                                    "
+			echo "*       Deodexing $frame             "
+			echo "*                                    "
+			echo "**************************************"
+		java -Xmx"$heapy"m -jar $oat2dex $framfol/$arch/$frame.odex $framfol/$arch/odex >> $logs/Deodex.log
+		mv $framfol/$arch/$frame.dex $framfol/$arch/classes.dex
+		if [[ -f "$framfol/$arch/$frame-classes2.dex" ]]; then
+			mv $framfol/$arch/$frame-classes2.dex $framfol/$arch/classes2.dex
+		fi
+		if [[ -f "$framfol/$arch/$frame-classes3.dex" ]]; then
+			mv $framfol/$arch/$frame-classes3.dex $framfol/$arch/classes3.dex
+		fi
+		if [[ ! -f $framfol/$frame.apk ]]; then
+			$zip7 u -tzip $framfol/$frame.jar $framfol/$arch/classes*.dex >> $logs/Deodex.log
+		else
+			$zip7 u -tzip $framfol/$frame.apk $framfol/$arch/classes*.dex >> $logs/Deodex.log
+		fi
+		rm -rf $framfol/$arch/classes*.dex
+			echo "**************************************"
+			echo "*                                    "
+			echo "*    $frame Deodexed Successfully    "
+			echo "*                                    "
+			echo "**************************************"
+	else
+		echo "**************************************"
+		echo "     $frame is already deodexed "
+		echo "**************************************"
+		rm -rf $framfol/$arch/$frame.odex
+	fi
+done
+frame2=""
+for frame2 in $( ls $framfol/$arch/dex | grep .dex | rev | cut -c 5- | rev ); do
+	if [[ $($zip7 l $framfol/$frame2.jar | grep classes.dex) = "" ]]; then
+		if [[ $frame2 != *"classes"* ]]; then
+			echo "**************************************"
+			echo "*                                    "
+			echo "*       Deodexing $frame2            "
+			echo "*                                    "
+			echo "**************************************"
+			mv $framfol/$arch/dex/$frame2.dex $framfol/$arch/dex/classes.dex
+			if [[ -f "$framfol/$arch/dex/$frame2-classes2.dex" ]]; then
+				mv $framfol/$arch/dex/$frame2-classes2.dex $framfol/$arch/dex/classes2.dex
+			fi
+			if [[ -f "$framfol/$arch/dex/$frame2-classes3.dex" ]]; then
+				mv $framfol/$arch/dex/$frame2-classes3.dex $framfol/$arch/dex/classes3.dex
+			fi
+			if [[ $(ls $framfol | grep $frame2.apk) = "" ]]; then
+				$zip7 u -tzip $framfol/$frame2.jar $framfol/$arch/dex/classes*.dex >> $logs/Deodex.log
+			else
+				$zip7 u -tzip $framfol/$frame2.apk $framfol/$arch/dex/classes*.dex >> $logs/Deodex.log
+			fi
+			rm -rf $framfol/$arch/dex/classes*.dex
+			echo "**************************************"
+			echo "*                                    "
+			echo "*    $frame2 Deodexed Successfully   "
+			echo "*                                    "
+			echo "**************************************"
+		fi
+	else
+		if [[ $frame2 != *"classes"* ]]; then
+			echo "**************************************"
+			echo "    $frame2 is already deodexed "
+			echo "**************************************"
+			rm -rf $framfol/$arch/dex/$frame2.dex
+		fi
+	fi
+done
+clear
+echo 
+echo "***********************************************"
+echo " Performing Check for any left over Odex Files "
+echo "***********************************************"
+sleep 3s
+rm -rf $framfol/$arch
+if [[ ! $arch2 = "" ]]; then
+	rm -rf $framfol/$arch2
+fi
+anythingleft=$(find $baseromfol/system -name *.odex)
+if [[ "$anythingleft" = "" ]]; then
+	clear
+	echo "Deodexing complete"
+	echo "Your Rom folder should now be Odex free"
+	echo ""
+	read -p "Press ENTER to continue"
+	ARCH_TEST
+else
+	clear
+	echo "The Following Files are currently still contained within your Rom and may cause issues."
+	echo ""
+	echo "$anythingleft"; tput sgr0
+	echo ""
+	read -p "Press ENTER to exit"
+	ARCH_TEST
+fi
+}
+
+#####################################################################################
+#
+#                                                    Bongs APK Kitchen Below
+#####################################################################################
+
+#################
+#                                     #
+#              MENUS!!        #
+#                                     #
+#################
+
+## Intro Menu ##
+APK_START_MENU() {
+clear
+echo "***************************************************************************************"
+echo "*                              BONGS APK KITCHEN                                      *"
+echo "***************************************************************************************"
+echo "*                            Written By BongOfWar                                     *"
+echo "***************************************************************************************"
+echo "*  Whether you're doing basic image editing or editing the smali or XML files, in     *"
+echo "*  general it requires atleast (Brut.all or smali/baksmali) to extract the apk,       *"
+echo "*  edit it, then sign the apk and then adb push/install it. This process can          *"
+echo "*  get very tedious if you are having to test and retest some of the changes.         *"
+echo "*  My hope is that this Kitchen will make that process more tolerable..               *"
+echo "***************************************************************************************"
+echo "*  Credits and Thanks Below                                                           *"
+echo "*  if you think i have missed a credit to you let me know so i can add it..           *"
+echo "***************************************************************************************"
+echo "*  Goes to Brut.all for his awesome tool.                                             *"
+echo "*  Goes to JF for of course, smali/baksmali tools                                     *"
+echo "*  Goes to iBotPeaches for his updates to Brut.all awesome tool.                      *"
+echo "***************************************************************************************"
+sleep 5s
+	if [ -e "editing" ] 
+	then
+		MAIN_MENU
+	else
+	echo "This is either the first time you have run"
+	sleep 2s
+	echo "Bongs APK Kitchen or you have deleted vital"
+	sleep 2s
+	echo "folders, you will now be taken to the setup menu."
+	sleep 2s
+		MAIN_SETUP
+	fi
+}
+
+## Main Menu ##
+MAIN_MENU() {
+shopt -s nullglob
+cd $current/place_input_file_here
+for ext in "apk"; do 
+  files=( *."$ext" )
+  done
+for jar in "jar"; do 
+  files=( *."$jar" )
+  done
+  cd $current
+while :; do
+clear
+echo -e "   ----------------------------------------------------------------------------------------------------------------------"
+echo -e "   DO. To Deodexer                               \e[93mBONGS APK KITCHEN\e[0m                       "
+echo -e "   ----------------------------------         ------------------------------------                      -----------------"
+echo -e "   Extraction And Decompile Options..         Compile and finalise options..                            Variables"
+echo -e "   ----------------------------------         ------------------------------------                      -----------------"
+echo -e "   0    Adb pull                              8    Adb push (Only for system apk)                       Current-APK-Tool:\e[1m$apktool\e[0m"
+echo -e "   1    Extract apk                           9    Optimize images inside                               Current-File: \e[1m$basefile\e[0m"
+echo -e "   2    Decompile apk                         10   Zip apk                                              Decompile: \e[1m$decompile\e[0m"
+echo -e "   3    Decompile apk (with dependencies)     11   Compile System APK files                             Resources.arsc Compression-Level: \e[1m$resusrc\e[0m"
+echo -e "   4    Sign apk with Testkeys                12   Compile Non-System APK Files                         Heap Size: \e[1m"$heapy"mb\e[0m"
+echo -e "        (Non-System Apps Only)                13   Compile\Sign\Install apk                             Compression-Level: \e[1m$usrc\e[0m"
+echo -e "   5    Zipalign apk (Do once apk is               (Non-System Apps Only)                               Current Smali\BakSmali: \e[1m$smalidis\e[0m"
+echo -e "        created/signed)                       14   Baksmali                                              "
+echo -e "   6    Install apk                           15   Smali"
+echo -e "        (Non-System Apps Only)                "
+echo -e "   7    Zip\Sign\Install apk"
+echo -e "        (All in one step)"
+echo -e "   ---------------                                                                                       -----------------"
+echo -e "   Kitchen Options                                                                                         Misc Options"
+echo -e "   ---------------                                                                                       -----------------"
+echo -e "   16   Batch Operations.                                                                                24   Read Log"
+echo -e "   17   Select Current Working Files                                                                     25   Clean APK Kitchen"
+echo -e "   18   Select APK Tool to use.                                                                          26   Screen Color"
+echo -e "   19   Select Smali\Baksmali Version                                                                    27   Open Folders"
+echo -e "   20   Select compression level for apk's                                                               28   Setup Page"
+echo -e "   21   Select compression level for Resources.arsc                                                      29   Info Page"
+echo -e "   22   Setup Memory Size (if you have and problems decompiling/compiling)                               30   Fast Install Framework "
+echo -e "   23   Switch decompile mode (Allows you to choose how to extract files depending                       99   Close"
+echo -e "        on what you are requiring access to edit.."
+echo -e "   ----------------------------------------------------------------------------------------------------------------------"
+echo -n "   Enter option: "
+  read opt
+    case $opt in
+		0) PULL_APK;;
+		1) EXTRACT_APK;;
+		2) APK_TEST;;
+		3) ded;;
+		4) TEST_SIGN;;
+		5) ZIP_ALIGN;;
+		6) ins;;
+		7) ZIP_SIGN_INSTALL;;
+		8) FILE_PUSH;;
+		9) OPT_PNG;;
+		10) RE_ZIP;;
+		11) COMPILE_SYSTEM;;
+		12) COMPILE_NONSYSTEM;;
+		13) COM_SIGN_INSTALL;;
+		14) BAK_SMALI;;
+		15) SM_ALI;;
+		16) BATCH_OPTIMIZE;;
+		17) CURRENT_FILE;;
+		18) SWITCH_APK;;
+		19) NOT_SETUP_YET;;
+		20) usrcomp;;
+		21) resusrcomp;;
+		22) heap;;
+		23) SWITCH_C;;
+		24) NOT_SETUP_YET;;
+		25) CLEAN_UP;;
+		26) NOT_SETUP_YET;;
+		27) folders;;
+		28) MAIN_SETUP;;
+		29) ABOUT_MENU;;
+		30) FRAME_WORK;;
+		DO|do|Do|dO) DEODEX_START_MENU;;
+		99) clear; EXIT_OUT;;
+		*)
+			echo "Unknown command: '$opt'"
+		;;
+    esac
+done
+}
+
+## Setup Page ##
+MAIN_SETUP() {
+clear
+while :; do
+PRINT_BANNER
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "*                         BONGS APK KITCHEN SETUP MENU                            *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 1. Pull & Install Framework Option                                              *"
+echo "*    This Will attempt to install our framework-res or SystemUI files             *"
+echo "*    for the script to run successfully please ensure you have dropped your       *"
+echo "*    resquired framework files into the tool\farmework folder,                    *"
+echo "*    If you have pulled them directly from you device they should already         *"
+echo "*    be in your tools\framework folder ready to install.                          *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 2. Setup Working Folders                                                        *"
+echo "*    This will setup the appropriate folder structure needed to run the           *"
+echo "*    Kitchen, This hould only ever need to be done on first run of the Kitchen    *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "*  3   Read Log                                                                   *"
+echo "*  4   Tool Versions / General Tips                                               *"
+echo "*  10  Main Menu                                                                  *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo -n "Enter option: "
+  read opt
+  case $opt in
+		1) FRAME_WORKS_INS ;;
+		2) DIR_SETUP ;;
+		3) KITCHEN_ LOGS ;;
+		4) ABOUT_OPT ;;
+		10) MAIN_MENU ;;
+		*) echo "Invalid option"; continue;;
+	esac
+done
+}
+
+## Directory Setup ##
+DIR_SETUP() {
+		clear
+		PRINT_BANNER
+		echo "***********************************************************************************"
+		echo "*                                                                                 *"
+		echo "*                          Creating editing folder                                *"
+		echo "*                                                                                 *"
+		echo "***********************************************************************************"
+			mkdir "editing"
+		echo "***********************************************************************************"
+		echo "*                                                                                 *"
+		echo "*                     Creating place input file here folder                       *"
+		echo "*                                                                                 *"
+		echo "***********************************************************************************"
+			mkdir "place_input_file_here"
+		echo "***********************************************************************************"
+		echo "*                                                                                 *"
+		echo "*                     Creating place apk here to sign folder                      *"
+		echo "*                                                                                 *"
+		echo "***********************************************************************************"
+			mkdir "place_apk_here_to_sign"
+		echo "***********************************************************************************"
+		echo "*                                                                                 *"
+		echo "*                       Creating batch_optimize folder                            *"
+		echo "*                                                                                 *"
+		echo "***********************************************************************************"
+			mkdir "batch_optimize"
+		echo "***********************************************************************************"
+		echo "*                                                                                 *"
+		echo "*                         DIRECTORY BUILD COMPLETE                                *"
+		echo "*                                                                                 *"
+		echo "***********************************************************************************"
+	read -p "Directory Setup Finished, Enter To Return"
+}
+
+## Frameworks Install Menu ##
+FRAME_WORKS_INS() {
+clear
+PRINT_BANNER
+while :; do
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "*                  APK KITCHEN SETUP DEPENDENCY FILES                             *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 1. Install framework-res.apk        6. Install lidroid-res.apk                  *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 2. Install twframework-res.apk      7. Install mediatek-res.apk                 *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 3. Install SystemUI.apk             8. Install framework-miui.apk               *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 4. Install com.htc.resources.apk                                                *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "* 5. Install SemcGenericUxpRes.apk                                                *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "*                       9. Pull Frameworks from Phone...                          *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo "*                                                                                 *"
+echo "*         10. Main Menu                              99. Exit APK Kitchen         *"
+echo "*                                                                                 *"
+echo "***********************************************************************************"
+echo -n "Enter option: "
+  read opt
+  case $opt in
+      1) F_RES_INSTALL;;
+      2) TW_F_INSTALL;;
+      3) S_UI_INSTALL;;
+      9) SYSTEM_PULL;;
+      10) clear; MAIN_MENU;;
+      99) clear; EXIT_OUT;;
+      *) echo "Invalid option"; continue;;
+    esac
+done
+}
+
+## Main About Menu ( To create adb logs ) ##
+ABOUT_MENU() {
+while :; do
+clear
+echo "About"
+echo "-----"
+cat "tools/logs/version.txt"
+echo "____ "
+echo "Tips"
+echo "----"
+echo "1. Never resign system apps unless you want to resign all of them apk's that share its shared:uid"
+echo  "."
+echo "2. if a system app looses its original AndroidManifest.xml then either push the apk when in recovery or"
+echo  "."
+echo "by doing :"
+echo "adb remount"
+echo "adb shell stop"
+echo "adb push your.apk \system\your.apk"
+echo "adb shell start"
+echo "Make sure you include your APK_KITCHEN.log, if you are reporting any problems with general kitchen"
+echo "if its something regarding adb, then please post your adb log to"
+echo "To create adb.log"
+echo "follow these steps :"
+echo "1. Connect your phone to your pc"
+echo "2. Push/install the app on your phone"
+echo "3. Select "Create Log" option on this menu"
+echo "4. Let the new window run for 10 seconds, then close it"
+echo "Once done, you will find a adblog.txt in the logs folder"
+echo "************************************************************************************"
+echo "*                                                                                  *"
+echo "*          1. Create log                   99. Go back to MAIN MENU                *"
+echo "*                                                                                  *"
+echo "************************************************************************************"
+echo -n "Enter option: "
+  read opt
+    case $opt in
+      1) NOT_SETUP_YET;;
+      99) MAIN_MENU;;
+      *) echo "Invalid option"; continue;;
+   esac
+done
+}
+
+## Setup Menu About Option ##
+ABOUT_OPT() {
+clear
+PRINT_BANNER
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "*                                   About                                       *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+echo "*                                                                               *"
+							cat "tools/logs/version.txt"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "*                                   Tips                                        *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "* (a) If you see errors while any script is operating please make sure that all *"
+echo "*     files and folders are in there original locations, If they are and you    *"
+echo "*     you are still having issues try a fresh extraction of the kitchen...      *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "* (b) This tool was created for modding purpose only NOT FOR HACKING IN ANY WAY *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "* If you are stuck and the log does not give you any indication as to what you  *"
+echo "* are doing wrong, then postas many details as possible in the thread           *"
+echo "*         http://forum.xda-developers.com/showthread.php?t=31766522             *"
+echo "* Make sure you include any revelant logs if available.                         *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+read -p " Thank You for using Bongs APK Kitchen, Press Enter to Continue.."
+}
+
+
+#################
+#                                      #
+#         FUNCTIONS!!      #
+#                                      #
+#################
+
+
+## Compile/Sign/Install all in 1 step ( Non System APK Only ) ##
+COM_SIGN_INSTALL() {
+	if [ ! -d "$current/editing/$apktool/$basefile" ]
+		then
+			NOT_DEC
+	else
+		java -jar $apktools b -p  $framepath "$current/editing/$apktool/$basefile" -o "$current/place_apk_here_to_sign/$apktool/unsigned$basefile"
+	fi
+cd  $current/tools/tools/sign
+	INFILE="$current/place_apk_here_to_sign/$apktool/unsigned$basefile"
+	OUTFILE="$current/place_apk_here_to_sign/$apktool/signed$basefile"
+	if [ -e "$INFILE" ] ; then
+		java -Xmx"$heapy"m -jar signapk.jar -w testkey.x509.pem testkey.pk8 "$INFILE" "$OUTFILE"
+	echo "File Successfully Signed With a New Test Key"
+	sleep 2s
+		if [ "x$?" = "x0" ] ; then
+			rm "$INFILE"
+			echo
+		fi
+	else
+		echo "Warning: cannot find file '$INFILE'"
+	fi
+cd $current/tools/tools/adb
+	echo "Waiting for device"
+		sudo adb devices
+		adb wait-for-device
+	echo "Where do you want adb to install the file " 
+	echo "Example of input : /system/app/launcher.apk"
+	read INPUT
+		adb install -r "$INPUT" "$current/place_apk_here_to_sign/$apktool/signed$basefile" 
+	echo " signed$basefile Was installed to $INPUT"
+	sleep 3s
+	if [ "$?" -ne "0" ] ; then
+		echo "Error: while Installing $APK_FILE"
+		sleep 2s
+	fi
+cd $current
+}
+
+## Zip/Sign/Install all in 1 Step ( Non System APK Only ) ##
+ZIP_SIGN_INSTALL() {
+	rm -rf "$current/editing/$apktool/$basefile/META-INF"
+		$zip7 a -tzip "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" "$current/editing/$apktool/$basefile/*" -mx$usrc
+cd  $current/tools/tools/sign
+	INFILE="$current/place_apk_here_to_sign/$apktool/unsigned$basefile"
+	OUTFILE="$current/place_apk_here_to_sign/$apktool/signed$basefile"
+	if [ -e "$INFILE" ] ; then
+		java -Xmx"$heapy"m -jar signapk.jar -w testkey.x509.pem testkey.pk8 "$INFILE" "$OUTFILE"
+	echo "File Successfully Signed With a New Test Key"
+	sleep 2s
+		if [ "x$?" = "x0" ] ; then
+			rm "$INFILE"
+			echo
+		fi
+	else
+		echo "Warning: cannot find file '$INFILE'"
+	fi
+cd $current/tools/tools/adb
+	echo "Waiting for device"
+		sudo adb devices
+		adb wait-for-device
+	echo "Where do you want adb to install the file " 
+	echo "Example of input : /system/app/launcher.apk"
+	read INPUT
+		adb install -r "$INPUT" "$current/place_apk_here_to_sign/$apktool/signed$basefile" 
+	echo " signed$basefile Was installed to $INPUT"
+	sleep 3s
+	if [ "$?" -ne "0" ] ; then
+		echo "Error: while Installing $APK_FILE"
+		sleep 2s
+	fi
+cd $current
+}
+
+BATCH_OPTIMIZE() {
+clear
+PRINT_BANNER
+echo "  ---------------------------------------------------------------------------"
+echo "                           BATCH OPTIONS "
+echo "  ---------------------------------------------------------------------------"
+echo "  1. Batch Decompile all APK files In Place_Input_Files_Here."
+echo "  2. Batch Re-Compile all APK files In Editing Folder."
+echo "  3. Batch Decompile Jar Files In Place_Input_Files_Here Folder."
+echo "  4. Batch Re-Compile all Jar In Editing Folder."
+echo "  5. Batch ZipAlign All Files In The Batch Optimize Folder."
+echo "  6. Batch Sign All Files In The place_apk_here_to_sign"
+echo "  7. Batch Optimize PNG in all APK Files in the Batch Optimize Folder."
+echo "  8. To MAIN MENU."
+echo  "  ---------------------------------------------------------------------------"
+printf "%s" "  Please make your decision: "
+read INPUT
+	if [ "$INPUT" = "1" ]; then
+		BATCH_DECOM
+	elif [ "$INPUT" = "2" ]; then
+		BATCH_COMPILE
+	elif [ "$INPUT" = "3" ]; then
+		BATCH_DECOM_JAR
+	elif [ "$INPUT" = "4" ]; then
+		BATCH_COMPILE_JAR
+	elif [ "$INPUT" = "5" ]; then
+		BATCH_ZIPALIGN
+	elif [ "$INPUT" = "6" ]; then
+		BATCH_TESTSIGN
+	elif [ "$INPUT" = "7" ]; then
+		BATCH_OPT
+	elif [ "$INPUT" = "8" ]; then
+		MAIN_MENU
+	else 
+	echo "Invalid Selection Try Again"
+	sleep 1s
+	BATCH_OPTIMIZE
+	fi
+}
+
+BATCH_OPT() {
+cd $current/batch_optimize
+	find *.apk | while read APK_FILE ;
+		do
+		echo "Optimizing $APK_FILE"
+		sleep 1s
+		# Extract
+		$zip7 x -o"$current/batch_optimize/original" "$current/batch_optimize/$APK_FILE"
+		# PNG
+		find "$current/batch_optimize/original" *.png | while read PNG_FILE ;
+		do
+			if [ `echo "$PNG_FILE" | grep -c "\.9\.png$"` -eq 0 ] ; then
+				optipng -o99 "$PNG_FILE"
+			fi
+		done
+		# Re-compress
+		$zip7 a -tzip "$current/batch_optimize/temp.zip" "$current/batch_optimize/original/*" -mx$usrc
+		FILE=`basename "$APK_FILE"`
+		DIR=`dirname "$APK_FILE"`
+		mv -f "$current/batch_optimize/temp.zip" "$DIR/optimized-$FILE"
+		rm -rf "$current/batch_optimize/original/*"
+	done
+	rm -rf "$current/batch_optimize/original"
+	cd $current
+}
+
+BATCH_DECOM() {
+cd $current/place_input_file_here
+APK=""
+	for APK in $(ls -d *.apk ); do
+		echo "Decompiling $APK"
+		# Decompile APK
+	java -Xmx"$heapy"M -jar $apktools d -f -p $framepath $APK -o $current/editing/$apktool/$APK
+	done
+cd $current
+}
+
+BATCH_DECOM_JAR() {
+cd $current/place_input_file_here
+JAR=""
+	for JAR in $(ls -d *.jar ); do
+		echo "Decompiling $JAR"
+		# Decompile JAR
+	java -Xmx"$heapy"M -jar $apktools d -f -p $framepath $JAR -o $current/editing/$apktool/$JAR
+	done
+cd $current
+}
+
+BATCH_COMPILE_JAR() {
+cd $current/editing/$apktool
+JAR=""
+	for JAR in $(ls -d *.jar ); do
+		echo "Compiling $JAR"
+		# Compile JAR
+	java -jar $apktool b -p $framepath $JAR -o $current/edited_output_files/$apktool/BatchComJar$JAR
+	done
+cd $current
+}
+
+BATCH_COMPILE() {
+cd $current/editing/$apktool
+APK=""
+	for APK in $(ls -d *.apk ); do
+		echo "Compiling $APK"
+		# Compile APK
+	java -jar $apktools b -p $framepath $current/editing/$apktool/$APK -o $current/edited_output_files/$apktool/BatchComApk$APK
+	done
+cd $current
+}
+
+BATCH_ZIPALIGN() {
+cd $current/batch_optimize
+APK=""
+	for APK in $(ls -d *.apk ); do
+		echo "ZipAligning $APK"
+		sleep 1s
+		# Zipalign
+	$zipali -fv 4 "$APK" "aligned""$APK" 
+	echo "ZipAlign Complete For $APK"
+	sleep 1s
+	done
+cd $current
+}
+
+BATCH_TESTSIGN() {
+cd $current/place_apk_here_to_sign
+	find  *.apk | while read APK_FILE ;
+		do
+		echo "Signing $APK_FILE with Test Key"
+	cd  $current/tools/tools/sign
+	INFILE="$current/place_apk_here_to_sign/$APK_FILE"
+	OUTFILE="$current/place_apk_here_to_sign/signed""$APK_FILE"
+	if [ -e "$INFILE" ] ; then
+		# TestKey Sign
+		java -Xmx"$heapy"m -jar signapk.jar -w testkey.x509.pem testkey.pk8 "$INFILE" "$OUTFILE"
+		echo "$APK_FILE Successfully Signed With a New Test Key"
+		sleep 2s
+		if [ "x$?" = "x0" ] ; then
+			rm "$INFILE"
+			echo
+		fi
+	else
+		echo "Warning: cannot find file '$INFILE'"
+		sleep 2s
+	fi
+done
+	cd $current
+}
+
+PULL_APK() {
+cd $current/tools/tools/adb
+	echo "Where do you want adb to pull the apk from? " 
+	echo "Example of input : /system/app/launcher.apk"
+	read INPUT
+	APK_FILE=`basename $INPUT`
+adb pull "$INPUT" "$current/place_input_file_here/$APK_FILE"
+echo " $APK_FILE Was Pulled and Placed In The place_input_file_here folder"
+sleep 3s
+	if [ "$?" -ne "0" ] ; then
+		echo "Error: while pulling $APK_FILE"
+		sleep 2s
+	fi
+cd $current
+}
+
+OPT_PNG() {
+cd $current/tools/tools/roopt
+	find "$current/editing/$apktool/$basefile/res" *.png | while read PNG_FILE ;
+	do
+		if [ `echo "$PNG_FILE" | grep -c "\.9\.png$"` -eq 0 ] ; then
+			optipng -o99 "$PNG_FILE"
+		fi
+	done
+	cd $current
+}
+
+FILE_PUSH() {
+cd $current/tools/tools/adb
+	echo "Where do you want adb to push to and as what name: "
+	echo "Example of input : /system/app/launcher.apk "
+	read INPUT
+	sudo adb devices
+	printf "%s" "Hit Enter to continue "
+	read DUMMY
+	adb push "$current/edited_output_files/$apktool/bonged$basefile" "$INPUT"
+	adb remount
+	
+cd $current
+MAIN_MENU
+}
+
+FRAME_WORK() {
+clear
+echo "This option will attempt to install your framework files,"
+echo "located within your framework folder, this option is for"
+echo "those who switch apktool alot and want to be able to install"
+echo  "there framework files easily."
+echo
+read -p "When ready press enter to attempt install"
+FAST_FRAME_WORKS_INS
+}
+
+FAST_FRAME_WORKS_INS() {
+	if [ -f "$current/tools/framework/framework-res.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/framework-res.apk -p $framepath
+	else
+		echo " framework-res.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/twframework-res.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/twframework-res.apk -p $framepath
+	else
+		echo "twframework-res.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/SystemUI.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/SystemUI.apk -p $framepath
+		else
+			echo "SystemUI.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/com.htc.resources.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/com.htc.resources.apk -p $framepath
+		else
+			echo "com.htc.resources.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/SemcGenericUxpRes.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/SemcGenericUxpRes.apk -p $framepath
+		else
+			echo "SemcGenericUxpRes.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/lidroid-res.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/lidroid-res.apk -p $framepath
+		else
+			echo "lidroid-res.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/mediatek-res.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/mediatek-res.apk -p $framepath
+		else
+			echo "mediatek-res.apk not present in framework folder"
+	fi
+	if [ -f "$current/tools/framework/framework-miui.apk" ]
+		then
+		java -jar $apktools if $current/tools/framework/framework-miui.apk -p $framepath
+		else
+			echo "framework-miui.apk not present in framework folder"
+	fi
+	echo " All Framework Files Processed"
+	sleep 2s
+cd $current
+}
+
+
+## Open Folder Menu ##
+folders() {
+while :; do
+clear
+echo "*--------------------------------------------*"
+echo  "   * What folder would you like to open?*"
+echo "*                                            *"
+echo     "* 1 To Open Editing Folder *"
+echo "*                                            *"
+echo     "* 2 To Open Edited Output Folder *"
+echo "*                                            *"
+echo     "* 3 To Open Input ( Base ) Folder *"
+echo "*                                            *"
+echo     "* 4 To Open Signing Folder *"
+echo "*                                            *"
+echo     "* 5 To Open Batch folder *"
+echo "*                                            *"
+echo     "* 6 To Open Framework Folder *"
+echo "*                                            *"
+echo     "* 99 To Go Back To MAIN MENU *"
+echo "*--------------------------------------------*"
+echo -n "Choices, Oh Choices: "
+	read opt
+	case $opt in
+		1) opeedit0;;
+		2) opeout0;;
+		3) opeinput0;;
+		4) opesign0;;
+		5) opebatch0;;
+		6) opeframe0;;
+		99) restart;;
+		*)
+			echo "Unknown command: '$opt'"; sleep 2s; folders
+		;;
+    esac
+done
+}
+
+opeedit0() {
+xdg-open "$current/editing"
+MAIN_MENU
+}
+
+opeout0() {
+xdg-open "$current/edited_output_files"
+MAIN_MENU
+}
+
+opeinput0() {
+xdg-open "$current/place_input_file_here"
+MAIN_MENU
+}
+
+opesign0() {
+xdg-open "$current/place_apk_here_to_sign"
+MAIN_MENU
+}
+
+opebatch0() {
+xdg-open "$current/batch_optimize"
+MAIN_MENU
+}
+
+opeframe0() {
+xdg-open "$current/tools/framework"
+MAIN_MENU
+}
+
+## CleanUp Folders Section ##
+CLEAN_UP() {
+clear
+echo " ---------------------------------------------------------------------------"
+echo "1. Clean The Files currently being editied."
+echo "2. Clean All Files in Editing Folder."
+echo "3. Clean All Files in Optimize Folder."
+echo "4. Clean All Files in Sign Folder."
+echo "5. Clean All Folders/Files."
+echo "6. Go Back To MAIN MENU."
+echo  "---------------------------------------------------------------------------"
+printf "%s" "Please make your decision: "
+read INPUT
+	if [ "$INPUT" = "1" ]; then
+		clean01
+	elif [ "$INPUT" = "2" ]; then
+		clean02
+	elif [ "$INPUT" = "3" ]; then
+		clean03
+	elif [ "$INPUT" = "4" ]; then
+		clean04
+	elif [ "$INPUT" = "5" ]; then
+		clean05
+	elif [ "$INPUT" = "6" ]; then
+		MAIN_MENU
+	else 
+	echo "Invalid Selection Try Again"
+	sleep 2s
+	CLEAN_UP
+	fi
+}
+
+clean01() {
+cd $current
+echo "Clearing Directories"
+rm -rf "$current/editing/$apktool/$current"
+sleep 2s
+
+}
+clean02() {
+cd $current
+echo "Clearing Directories"
+rm -rf "$current/editing"
+mkdir "$current/editing"
+sleep 2s
+}
+
+clean03() {
+cd $current
+echo "Clearing Directories"
+rm -rf "$current/batch_optimize"
+mkdir "$current/batch_optimize"
+sleep 2s
+}
+
+clean04() {
+cd $current
+echo "Clearing Directories"
+rm -rf "$current/place_apk_here_to_sign"
+mkdir "$current/place_apk_here_to_sign"
+sleep 2s
+}
+
+clean05() {
+cd $current
+echo "Clearing Directories"
+rm -rf "$current/place_input_file_here"
+mkdir "$current/place_input_file_here"
+rm -rf  "$current/batch_optimize"
+mkdir "$current/batch_optimize"
+rm -rf  "$current/place_apk_here_to_sign"
+mkdir "$current/place_apk_here_to_sign"
+rm -rf  "$current/editing"
+mkdir "$current/editing"
+echo "Folder Clean-Up Complete"
+sleep 2s
+}
+
+## Checks Choice and Zips ready to be signed if this option was selected ##
+NONSYSTEM_ZIP() {
+	rm -rf "$current/editing/$apktool/$basefile/META-INF"
+	$zip7 a -tzip "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" "$current/editing/$apktool/$basefile/*" -mx$usrc
+	cd $current
+}
+
+## Checks Choice and Zips with original sign if this option was selected ##
+SYSTEM_ZIP() {
+	$zip7 a -tzip "$current/edited_output_files/$apktool/systemsigned$basefile" "$current/editing/$apktool/$basefile/*" -mx$usrc
+	cd $current
+}
+
+## Re-Zip Extracted Files ##
+RE_ZIP() {
+	clear
+	echo "1 System apk (Retains signature)"
+	echo "2 Regular apk (Removes signature for re-signing)"
+	printf "%s" "Please make your decision: "
+	read RETVAL
+	if [ "x$RETVAL" = "x1" ] ; then
+		SYSTEM_ZIP
+	elif [ "x$RETVAL" = "x2" ] ; then
+		NONSYSTEM_ZIP
+	else 
+	echo "Invalid Selection Try Again"
+	fi
+	cd $current
+}
+
+## Sign File With New Test Key ##
+TEST_SIGN() {
+	cd  $current/tools/tools/sign
+	INFILE="$current/place_apk_here_to_sign/$apktool/unsigned$basefile"
+	OUTFILE="$current/place_apk_here_to_sign/$apktool/signed$basefile"
+	if [ -e "$INFILE" ] ; then
+		java -Xmx"$heapy"m -jar signapk.jar -w testkey.x509.pem testkey.pk8 "$INFILE" "$OUTFILE"
+		echo "File Successfully Signed With a New Test Key"
+		sleep 2s
+		if [ "x$?" = "x0" ] ; then
+			rm "$INFILE"
+			echo
+		fi
+	else
+		echo "Warning: cannot find file '$INFILE'"
+	fi
+	cd $current
+}
+
+## ZipAlign File ##
+ZIP_ALIGN() {
+for STRING in "signed" "unsigned"
+	do
+		if [ -e "$current/place_apk_here_to_sign/$apktool/$STRING$basefile" ] ; then
+			$zipali -fv 4 "$current/place_apk_here_to_sign/$apktool/$STRING$basefile" "$current/place_apk_here_to_sign/$apktool/$STRINGaligned$basefile"
+			if [ "x$?" = "x0" ] ; then
+				mv -f "$current/place_apk_here_to_sign/$apktool/$STRINGaligned$basefile" "$current/place_apk_here_to_sign/$apktool/$STRING$basefile"
+			fi
+		else
+			echo "zipalign: cannot find file '$current/place_apk_here_to_sign/$apktool/$STRING$basefile'"
+		fi
+	done
+cd $current	
+}
+
+## Test if a APKTOOL is selected before decompile ##
+APK_TEST() {
+	if [ "$apktool" ]
+		then 
+			BASE_TEST
+		else SWITCH_APK
+	fi
+}
+
+## Test if a file is selected to edit before decompile ##
+BASE_TEST() {
+	if [ "$basefile" ]
+		then 
+			DECOMPILE_MODE	
+		else CURRENT_FILE
+	fi
+}
+
+## Select Mode To Decompile In ##
+DECOMPILE_MODE() {
+rm -rf "$current/editing/$apktool/$basefile"
+	if [ "$decompile" = "Sources_and_Resources_Files" ]
+		then
+			java -Xmx"$heapy"M -jar $apktools d -f -p $framepath $current/place_input_file_here/$basefile -o $current/editing/$apktool/$basefile
+			OPEN_FILE
+		if [ "x$?" = "x1" ] ; then 
+			ERR_OR
+		fi
+	elif [ "$decompile" = "Sources_Files_Only" ]
+		then
+			java -Xmx"$heapy"M -jar $apktools d -r -f -p $framepath $current/place_input_file_here/$basefile -o $current/editing/$apktool/$basefile
+		OPEN_FILE
+		if [ "x$?" = "x1" ] ; then 
+			ERR_OR
+		fi
+	elif [ "$decompile" = "Resource_Files_only" ]
+		then
+			java -Xmx"$heapy"M -jar $apktools d -s -f -p $framepath $current/place_input_file_here/$basefile -o $current/editing/$apktool/$basefile
+		OPEN_FILE
+		if [ "x$?" = "x1" ] ; then 
+			ERR_OR
+		fi
+	elif [ "$decompile" = "Raw_Format_Only" ]
+		then
+			java -Xmx"$heapy"M -jar $apktools d -r -s -f -p $framepath $current/place_input_file_here/$basefile -o $current/editing/$apktool/$basefile
+		OPEN_FILE
+		if [ "x$?" = "x1" ] ; then 
+			ERR_OR
+		fi
+	fi
+cd $current
+MAIN_MENU
+}
+
+## Error Catcher ##
+ERR_OR() {
+clear
+echo 
+echo "An ERROR occured during last process, please try again or leave a bug report if it persists"
+PRESS_ENTER
+cd $current
+MAIN_MENU
+}
+
+## Open Current File After Decompile ##
+OPEN_FILE() {
+clear
+echo "$basefile has finished decompiling. Would you like to open the $basefile folder to begin editing?"
+echo "Would you like to open folder? ^(y/n^)"
+	printf "%s" "Please make your decision: "
+	read INPUT
+	if [ "$INPUT" = "y" ]; then
+		xdg-open "$current/editing/$apktool/$basefile"
+	elif [ "$INPUT" = "n" ]; then
+		MAIN_MENU
+	else
+		echo " Invalid Selection Try Again"
+		sleep 1s
+		OPEN_FILE
+	fi
+}
+
+## Change Java Heap Space To Used ##
+heap() {
+echo -n "Enter max size for java heap space in megabytes (eg 512): "
+	read INPUT 
+		heapy=$INPUT
+}
+
+## Device Info ( Not Utilised Yet ) ##
+device() {
+echo -n "Enter the name for the device you will be editing file for: "
+	read INPUT 
+		devc=$INPUT
+}
+
+## Set Compression Level For Zipping ##
+usrcomp() {
+echo -n "Enter Compression Level (0-9): "
+	read INPUT 
+		usrc=$INPUT
+}
+
+## Set Compression Level For Resources.arsc ##
+resusrcomp() {
+echo -n "Enter Compression Level (0-9): "
+	read INPUT 
+		resusrc=$INPUT
+}
+
+## ERROR Catcher ##
+NOT_SETUP_YET() {
+echo "This option has not current been setup yet, if it appears here as an aption it will be available soon.."
+sleep 2s
+MAIN_MENU
+}
+
+## Extract APK ( Un-Zip File ) ##
+EXTRACT_APK() {
+if [ "$basefile" ]
+	then
+cd $current
+echo "Extracting apk"
+	rm -rf "$current/editing/$apktool/$basefile"
+	if [ ! -d "$current/editing/$apktool/$basefile" ] ; then
+		mkdir "$current/editing/$apktool/$basefile"
+	fi
+	clear
+	# Must be -o"../out" and not -o "../out"
+	$zip7 x -o"$current/editing/$apktool/$basefile" "$current/place_input_file_here/$basefile"
+	else CURRENT_FILE
+fi
+	cd $current
+}
+
+ded() {
+cd $current
+cd tools/tools/apktools
+	if [ -e "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" ]; then
+		rm "$$current/place_apk_here_to_sign/$apktool/unsigned$basefile"
+	fi
+	if [ -e "$current/editing/$apktool/$basefile" ]; then
+		rm "$current/editing/$apktool/$basefile"
+	fi
+echo "Drag the dependee apk in this window or type its path"
+echo "Example to decompile Rosie.apk, drag com.htc.resources.apk in this window"
+read INPUT
+sleep 3s
+clear
+java -jar $apktools "$current/place_input_file_here/$basefile" -o "$current/editing/$apktool/$basefile" 
+
+	if [ -e $current/tools/tools/framework/$apktool/2.apk ]; then
+		MAIN_MENU
+	else
+		cd $current
+		RETRY_01
+	fi
+}
+
+RETRY_01() {
+	clear
+	echo "Sorry thats not the dependee apk of $basefile, Would you like to try again?"
+	echo "1    Yes "
+	echo "2    No "
+	printf "%s" "Please make your decision: "
+	read RETVAL
+	if [ "x$RETVAL" = "x1" ] ; then
+		ded
+	elif [ "x$RETVAL" = "x2" ] ; then
+		MAIN_MENU
+	else
+		echo " Invalid Selection Try Again"
+		sleep 2s
+		RETRY_01
+	fi
+	cd $current
+}
+
+## Smali ##
+SM_ALI() {
+cd $current/editing/$apktool/$basefile
+mv "$current/tools/tools/smali/smali-2.0.6.jar" "$current/editing/$apktool/$basefile/smali-2.0.6.jar"
+echo " Working "
+java -jar smali-2.0.6.jar smali -o classes.dex
+mv "$current/editing/$apktool/$basefile/smali-2.0.6.jar" "$current/tools/tools/smali/smali-2.0.6.jar"
+echo " completed "
+sleep 2s
+cd $current
+}
+
+## Baksmali ##
+BAK_SMALI() {
+cd $current/editing/$apktool/$basefile
+mv "$current/tools/tools/smali/baksmali-2.0.6.jar" "$current/editing/$apktool/$basefile/baksmali-2.0.6.jar"
+echo " Working "
+java -jar baksmali-2.0.6.jar classes.dex -o smali
+mv "$current/editing/$apktool/$basefile/baksmali-2.0.6.jar" "$current/tools/tools/smali/baksmali-2.0.6.jar"
+echo " completed "
+sleep 2s
+cd $current
+}
+
+## Check For Selected File before attempt to System Compile ##
+COMPILE_SYSTEM() {
+	if [ "$basefile" ]
+		then 
+			START_SYS_COM	
+		else CURRENT_FILE
+	fi
+}
+
+## Compile System File ( Retain Original Signature ) ##
+START_SYS_COM() {
+	if [ ! -d "$current/editing/$apktool/$basefile" ]
+		then
+			NOT_DEC
+	else
+		java -jar $apktools b -p  $framepath $current/editing/$apktool/$basefile -o $current/edited_output_files/$apktool/bonged$basefile
+	fi
+		cd $current
+SYS_COM_CHK
+}
+
+## Keep Files Check ##
+SYS_COM_CHK() {
+echo "Aside from the signatures, would you like to copy"
+echo "over any additional files that you did not modify"
+echo "from the original apk in order to ensure least "
+echo "# of errors ^(y/n^)"
+printf "%s" "Please make your decision: "
+read INPUT
+	if [ "$INPUT" = "y" ]; then
+		syscom01
+	elif [ "$INPUT" = "n" ]; then
+		syscom02
+	else
+		echo " Invalid Selection Try Again"
+		sleep 2s
+		SYS_COM_CHK
+	fi
+}
+
+## Decompile Error Catcher ##
+NOT_DEC() {
+echo
+echo " The Selected file Has either not been decompiled or you have changed apktool"
+echo 
+sleep 3s
+MAIN_MENU
+}
+
+## Create Keep Folder and Wait for User Input ##
+syscom01() {
+rm -rf "$current/keep"
+	$zip7 x -o"$current/keep" "$current/place_input_file_here/$basefile" >> $logs/SystemCompile.log
+echo "In the KITCHEN folder you will find"
+echo "a keep folder. Within it, delete "
+echo "everything you have modified and leave"
+echo "files that you have not. IF you have modified"
+echo "any xml, then delete resources.arsc from that "
+echo "folder as well as if you have edited any of "
+echo "the smali files you will also want to delete"
+echo "the classes.dex."
+read -p "Press Enter When Finished"
+$zip7 a -tzip "$current/edited_output_files/$apktool/bonged$basefile" "$current/temp/*" -mx$usrc -r >> $logs/SystemCompile.log
+rm -rf "$current/keep"
+$zip7 x -o"$curent/editing/$apktool/temp" "$current/edited_output_files/$apktool/bonged$basefile" resources.arsc -r >> $logs/SystemCompile.log
+$zip7 a -tzip "$current/edited_output_files/$apktool/bonged$basefile" "$current/editing/$apktool/keep/resources.arsc" -mx$resusrc -r >> $logs/SystemCompile.log
+rm -rf "$current/editing/$apktool/temp"
+cd $current
+MAIN_MENU
+}
+
+## No Keep Folder Just Zip ##
+syscom02() {
+$zip7 x -o"$current/editing/$apktool/temp" "$current/place_input_file_here/$basefile" META-INF -r >> $logs/SystemCompile.log
+$zip7 a -tzip "$current/edited_output_files/$apktool/bonged$basefile" "$current/editing/$apktool/temp/*" -mx$usrc -r >> $logs/SystemCompile.log
+rm -rf "$current/editing/$apktool/temp"
+cd $current
+syscom03
+}
+
+## Keep Original Manifest? ##
+syscom03() {
+clear
+echo "Would you like to copy over the AndroidManifest.xml from the original $basefile"
+echo "(Y)ES or (N)O?"
+printf "%s" "Please make your decision: "
+read INPUT
+	if [ "$INPUT" = "y" ]; then
+		syscom04
+	elif [ "$INPUT" = "n" ]; then
+		syscom05
+	else 
+		echo "Invalid Selection Try Again"
+		sleep 1s
+		syscom03
+	fi
+}
+
+## Yes Keep and Copy Then Zip ##
+syscom04() {
+$zip7 x -o"$current/editing/$apktool/temp" "$current/place_input_file_here/$basefile" AndroidManifest.xml -r >> $logs/SystemCompile.log
+$zip7 a -tzip "$current/edited_output_files/$apktool/bonged$basefile" "$current/editing/$apktool/temp/AndroidManifest.xml" -mx$usrc -r >> $logs/SystemCompile.log
+rm -rf "$current/editing/$apktool/temp"
+cd $current
+MAIN_MENU
+}
+
+## Don't Keep Return To Main Menu ##
+syscom05() {
+cd $current
+MAIN_MENU
+}
+
+## Check For Selected File before attempt to NON-System Compile ##
+COMPILE_NONSYSTEM() {
+	if [ "$basefile" ]
+		then 
+			START_NONSYS_COM	
+		else CURRENT_FILE
+	fi
+}
+
+## Start The Re-Compile ##
+START_NONSYS_COM() {
+	if [ ! -d "$current/editing/$apktool/$basefile" ]
+		then
+			NOT_DEC
+	else
+		java -jar $apktools b -p  $framepath $current/editing/$apktool/$basefile -o $current/edited_output_files/$apktool/bonged$basefile
+	fi
+cd $current
+NONSYS_COM_CHK
+}
+
+## Keep Files Check ##
+NONSYS_COM_CHK() {
+echo " ---------------------------------------------------------------------------"
+echo " 1. Create an unsigned apk using the keep folder option"
+echo " 2. Create an unsigned apk using the original AndroidManifest.xml"
+echo " 3. Create an unsigned apk"
+echo  "---------------------------------------------------------------------------"
+printf "%s" "Please make your decision: "
+read INPUT
+	if [ "$INPUT" = "1" ]; then
+		COMPILE_NONSYS_COM
+	elif [ "$INPUT" = "2" ]; then
+		unsign02
+	elif [ "$INPUT" = "3" ]; then
+		unsign03
+	else 
+	echo "Invalid Selection Try Again"
+	sleep 2s
+	NONSYS_COM_CHK
+	fi
+}
+
+## Compile Non-System File ( To Be Signed With TestKey ) ##
+COMPILE_NONSYS_COM() {
+clear
+rm -rf "$current/keep"
+	$zip7 x -o"$current/keep" "$current/place_input_file_here/$basefile" >> $logs/Non-SystemCompile.log
+echo "In the KITCHEN folder you will find"
+echo "a keep folder. Within it, delete "
+echo "everything you have modified and leave"
+echo "files that you have not. IF you have modified"
+echo "any xml, then delete resources.arsc from that "
+echo "folder as well as if you have edited any of "
+echo "the smali files you will also want to delete"
+echo "the classes.dex."
+read -p "Press Enter When Finished"
+$zip7 a -tzip "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" "$current/keep/*" -mx$usrc -r >> $logs/Non-SystemCompile.log
+rm -rf "$current/keep"
+$zip7 x -o"$current/temp" "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" resources.arsc -r >> $logs/Non-SystemCompile.log
+$zip7 a -tzip "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" "$current/temp/resources.arsc" -mx$resusrc -r > $logs/Non-SystemCompile.log
+rm -rf "$current/temp"
+cd $current
+}
+
+## Keep Original Manifest Check ##
+unsign02() {
+mkdir "$current/editing/$apktool/temp"
+$zip7 x -o"$current/editing/$apktool/temp" "$current/place_input_file_here/$basefile" AndroidManifest.xml -r >> $logs/Non-SystemCompile.log
+$zip7 a -tzip "$current/place_apk_here_to_sign/$apktool/unsigned$basefile" "$current/editing/$apktool/temp/AndroidManifest.xml" -mx$usrc -r > $logs/Non-SystemCompile.log
+rm -rf "$current/editing/$apktool/temp"
+cd $current
+MAIN_MENU
+}
+
+## Skip Original Manifest ##
+unsign03() {
+cd $current
+MAIN_MENU
+}
+
+ins() {
+cd $current/tools/tools/adb
+echo "Waiting for device"
+sudo adb devices
+adb wait-for-device
+	echo "Where do you want adb to install the file " 
+	echo "Example of input : /system/app/launcher.apk"
+	read INPUT
+adb install -r "$INPUT" "$current/place_apk_here_to_sign/$apktool/signed$basefile" 
+echo " signed$basefile Was installed to $INPUT"
+sleep 3s
+	if [ "$?" -ne "0" ] ; then
+		echo "Error: while pulling $APK_FILE"
+		sleep 2s
+	fi
+cd $current
+}
+
+F_RES_INSTALL() {
+if [ -e "$current/tools/framework/framework-res.apk" ]; then
+		java -jar $apktools if $current/tools/framework/framework-res.apk -p $framepath
+		sleep 2s
+		FRAME_WORKS_INS
+	else
+		echo "ERROR framework-res.apk was not present in your frameworks folder, Please correct this and try again"
+		sleep 2s
+		FRAME_WORKS_INS
+	fi
+cd $current
+}
+
+S_UI_INSTALL() {
+if [ -e "$current/tools/framework/SystemUI.apk" ]; then
+		java -jar $apktools if $current/tools/framework/SystemUI.apk -p $framepath
+		sleep 2s
+		FRAME_WORKS_INS
+	else
+		echo "ERROR SystemUI.apk was not present in your frameworks folder, Please correct this and try again"
+		sleep 2s
+		FRAME_WORKS_INS
+		
+	fi
+cd $current	
+}
+
+TW_F_INSTALL() {
+if [ -e "$current/tools/framework/twframework-res.apk" ]; then
+		java -jar $apktools if $current/tools/framework/twframework-res.apk -p $framepath
+		sleep 2s
+		FRAME_WORKS_INS
+	else
+		echo "ERROR twframework-res.apk was not present in your frameworks folder, Please correct this and try again"
+		sleep 2s
+		FRAME_WORKS_INS
+		
+	fi	
+cd $current
+}
+
+SYSTEM_PULL() {
+clear
+cd $current/tools/tools/adb
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "*  The script will now try to pull dependencies from your phone.                *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+sleep 2s
+echo "Waiting for device..."
+adb kill-server
+adb wait-for-device
+echo "*********************************************************************************"
+echo "*                                                                               *"
+echo "*  Device found Beginning system pull from quired files from phone              *"
+echo "*  Please note that not all phones will have all the files listed above         *"
+echo "*                                                                               *"
+echo "*********************************************************************************"
+echo "Device found."
+echo "atempting to pull framework-res.apk"
+adb pull "system/framework/framework-res.apk" "$current/tools/framework"
+echo "atempting to pull twframework-res.apk"
+adb pull "system/framework/twframework-res.apk" "$current/tools/framework"
+echo "atempting to pull com.htc.resources.apk"
+adb pull "system/framework/com.htc.resources.apk" "$current/tools/framework"
+echo "atempting to pull SemcGenericUxpRes.apk"
+adb pull "system/framework/SemcGenericUxpRes.apk" "$current/tools/framework"
+echo "atempting to pull SystemUI.apk"
+adb pull "system/app/SystemUI.apk" "$current/tools/framework"
+echo "atempting to pull priv SystemUI.apk"
+adb pull "system/priv-app/SystemUI/SystemUI.apk" "$current/tools/framework"
+echo "atempting to pull lidroid-res.apk"
+adb pull "system/framework/lidroid-res.apk" "$current/tools/framework"
+echo "atempting to pull mediatek-res.apk"
+adb pull "system/framework/mediatek-res.apk" "$current/tools/framework"
+echo "atempting to pull framework-miui.apk"
+adb pull "system/framework/framework-miui.apk" "$current/tools/framework"
+sleep 3s
+echo "System pull complete Killing ADB"
+adb kill-server
+echo "ADB KILLED NOW Returning to main menu"
+cd $current
+}
+
+# Prints 
+PRINT_BANNER() {
+	clear
+echo "           _____  _  __       _  _______ _______ _____ _    _ ______ _   _ ";
+echo "     /\   |  __ \| |/ /      | |/ /_   _|__   __/ ____| |  | |  ____| \ | |";
+echo "    /  \  | |__) | ' /       | ' /  | |    | | | |    | |__| | |__  |  \| |";
+echo "   / /\ \ |  ___/|  <        |  <   | |    | | | |    |  __  |  __| | . \` |";
+echo "  / ____ \| |    | . \       | . \ _| |_   | | | |____| |  | | |____| |\  |";
+echo " /_/    \_\_|    |_|\_\      |_|\_\_____|  |_|  \_____|_|  |_|______|_| \_|";
+echo
+echo "Developed by BongOfWar"
+echo "Original thread: $XDALINK"
+}
+
+# Prints 
+PRINT_BANNER2() {
+	clear
+echo "           _____  _  __       _  _______ _______ _____ _    _ ______ _   _ ";
+echo "     /\   |  __ \| |/ /      | |/ /_   _|__   __/ ____| |  | |  ____| \ | |";
+echo "    /  \  | |__) | ' /       | ' /  | |    | | | |    | |__| | |__  |  \| |";
+echo "   / /\ \ |  ___/|  <        |  <   | |    | | | |    |  __  |  __| | . \` |";
+echo "  / ____ \| |    | . \       | . \ _| |_   | | | |____| |  | | |____| |\  |";
+echo " /_/    \_\_|    |_|\_\      |_|\_\_____|  |_|  \_____|_|  |_|______|_| \_|";
+echo
+echo
+echo " By "
+}
+
+# Prints 
+PRINT_BONG() {
+echo " __   _  _  _  _   _  __  _  _  _  __  ,  _ ";
+echo " |_) / \ |\ | / _ / \ |_  |  | /_\ |_) ' (_ ";
+echo " |_) \_/ | \| \_/ \_/ |   |/\| | | | \   ,_)";
+echo
+}
+
+# Prints 
+PRINT_BONG2() {
+echo " __   _  _  _  _   _  __  _  _  _  __  ";
+echo " |_) / \ |\ | / _ / \ |_  |  | /_\ |_) ";
+echo " |_) \_/ | \| \_/ \_/ |   |/\| | | | \ ";
+echo
+}
+
+## Selects Current File To Edit ##
+CURRENT_FILE() {
+echo "Select File To Edit.."
+		PS3="Number:"
+		inputfilesarr=`ls -1 "place_input_file_here"`
+		select name in $inputfilesarr
+		do
+			break
+		done
+		basefile=$name
+		cd $current
+}
+
+## Switch APKTOOL Used ##
+SWITCH_APK() {
+		PS3="Number:"
+		apktoolsarr=`ls -1 "tools/tools/apktools"`
+		select apksel in $apktoolsarr
+		do
+			break
+		done
+		apktool=$apksel
+		apktools=$current/tools/tools/apktools/$apktool
+		cd $current
+}
+
+## Switch Smail\Baksmali Used ##
+SWITCH_SMALI() {
+		PS3="Number:"
+		smaliarr=`ls -1 "tools/tools/smali"`
+		select smalisel in $smaliarr
+		do
+			break
+		done
+		smalidis=$smalisel
+		cd $current
+}
+
+## Switch Decompile Method ##
+SWITCH_C() {
+		PS3="Number:"
+		decompilearr=("Sources_and_Resources_Files Sources_Files_Only Resource_Files_only Raw_Format_Only")
+		select decom in $decompilearr
+		do
+			break
+		done
+		decompile=$decom
+		cd $current
+}
+
+#################
+#                                     #
+#      CORE SYSTEM!!     #
+#                                     #
+#################
+
+## Start ##
+PATH="$PATH:$PWD/tools/tools/roopt"
+PATH="$PATH:$PWD/tools/tools/aapt"
+PATH="$PATH:$PWD/tools/tools/adb"
+PATH="$PATH:$PWD/tools/tools/zipalign"
+export PATH
+
+
+## Test for Tools And Throw Error If Any Missing ##
+ERROR="0"
+for PROGRAM in "optipng" "7za" "java" "sudo" "adb" "zipalign" "aapt" 
+do
+	which "$PROGRAM" > /dev/null 
+	if [ "x$?" = "x1" ] ; then
+		ERROR="1"
+		echo "The program $PROGRAM is missing or is not in your PATH,"
+		echo "please install it or fix your PATH variable"
+		sleep 5s
+	fi
+done
+if [ "x$ERROR" = "x1" ] ; then
+	exit 1
+fi
+
+## Make it all Executable ##
+cd $current/tools/tools/zip
+chmod 755 7za
+cd $current
+cd $current/tools/tools/adb/lib
+chmod 755 libc++.so
+cd $current
+cd $current/tools/tools/adb
+chmod 755 adb
+chmod 755 fastboot
+chmod 755 sqlite3
+cd $current
+cd $current/tools/tools/aapt
+chmod 755 aapt
+cd $current
+cd $current/tools/tools/apktools
+chmod 755 apktool
+chmod 755 apktool_2.0.2_Bongs_Pull.jar
+cd $current
+cd $current/tools/tools/roopt
+chmod 755 optipng
+cd $current
+cd $current/tools/tools/sign
+chmod 755 signapk.jar
+cd $current
+cd $current/tools/tools/smali
+chmod 755 baksmali.jar
+chmod 755 smali.jar
+cd $current
+cd $current/tools/tools/zipalign
+chmod 755 zipalign
+cd $current
+cd $current/tools/tools/zipalign/lib
+chmod 755 libc++.so
+cd $current
+cd $current/tools/tools/oat2dex
+chmod 755 oat2dex.jar
+cd $current
+
+
+## Exit Option ##
+EXIT_OUT() {
+PRINT_BANNER2
+PRINT_BONG2
+echo 
+echo "Thank You $CUSER For Using Bong's APK Kitchen"
+echo 
+sleep 3s
+exit 1
+}
+
+## Just Exit
+EXIT_1() {
+exit 1
+}
+
+## StartUp Print-Out ##
+echo "Please Wait Loading..."
+sleep 1s
+echo "Welcome $CUSER to"
+PRINT_BONG
+sleep 2s
+PRINT_BANNER
+sleep 2s
+echo "Loading complete... Welcome to the Kitchen $CUSER"
+sleep 2s
+BASE_MENU
+
+# Failsafe Exit
+echo "Script Did not start correctly and will now exit please issue a bud report"
+sleep 2s
+exit 1
+
+##############
+#                              #
+#  By BongOfWar..    #
+#                              #
+##############

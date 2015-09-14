@@ -1,0 +1,12 @@
+﻿This is just a basic guide for BongOfWars Lollipop Deodexer for Linux,
+Part of Bongs Multi Kitchen..
+
+1. First step is to copy your full rom folder over into the main kitchen folder. ( Ensure there are no spaces in folder name )
+2. Start Bongs Multi Kitchen ( Double Click Main )
+3. Select option 2 at first menu to goto the Deodexer menu
+4. Select option 1 at next menu
+5. Type the name of your Rom folder exactly as it is in the Kitchen ( If this step is done correctly your rom info should be shown on the right )
+6. If everything looks correct select option 2 and then option 4 for a full system deodex
+7. Sit back and wait for it to finish
+8. Test the rom on your phone.
+
