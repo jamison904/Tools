@@ -1,0 +1,20 @@
+#!/system/bin/sh
+
+if busybox [ -e /system/customize/resource/bootanimation.bak ]; then
+	BOOT_ANI=/system/customize/resource/bootanimation.bak
+elif busybox [ -e /system/customize/resource/bootanimation.bak ]; then
+	BOOT_ANI=/system/customize/resource/VZW_bootanimation.bak
+elif busybox [ -e /data/local/bootanimation.bak ]; then
+	BOOT_ANI=/data/local/bootanimation.bak
+else
+	echo "Failed to find your disabled boot animation."
+	exit 1
+fi
+
+NEW_LOCATION=${BOOT_ANI%.*}.zip
+
+busybox mount -o remount,rw /system
+busybox mv -f $BOOT_ANI $NEW_LOCATION
+busybox mount -o remount,ro /system
+
+echo "Enabled your boot animation"

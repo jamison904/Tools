@@ -1,0 +1,4 @@
+#!/system/bin/sh
+
+busybox echo 1 > /data/.recovery_mode
+reboot

@@ -1,0 +1,13 @@
+#!/system/bin/sh
+
+DEV=/dev/block/ramzswap0
+MODULE=/system/lib/modules/ramzswap.ko
+
+if busybox [ ! -e $MODULE -o -z "$( busybox which rzscontrol )" ]; then
+	echo "Your system does not support compcache."
+	exit
+fi
+
+busybox swapoff $DEV >/dev/null 2>&1
+busybox rmmod ramzswap.ko >/dev/null 2>&1
+echo "Disabled compcache"

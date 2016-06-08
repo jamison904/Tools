@@ -1,0 +1,6 @@
+#!/system/bin/sh
+
+busybox rm /data/system/batterystats.bin
+
+echo "Wiped battery stats"
+echo "You should probably reboot now"

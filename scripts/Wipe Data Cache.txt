@@ -1,0 +1,3 @@
+#!/system/bin/sh
+
+busybox find /data/data -type d -iname "*cache*" -exec busybox rm -f {}/* ';' -exec echo "Cleared {}" ';'
